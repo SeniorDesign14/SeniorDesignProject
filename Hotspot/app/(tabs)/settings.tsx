@@ -1,5 +1,5 @@
 import { View, Text, SafeAreaView, StyleSheet, ScrollView, Button, Switch, TextInput } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 
 // const Settings = () => {
 //   return (
@@ -10,6 +10,11 @@ import React from 'react'
 // }
 
 const Settings: React.FC = () => {
+
+  const [isPushEnabled, setIsPushEnabled] = useState(true);
+  const [isEmailEnabled, setIsEmailEnabled] = useState(false);
+  const [isDarkModeEnabled, setIsDarkModeEnabled] = useState(false);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -25,11 +30,11 @@ const Settings: React.FC = () => {
           <Text style={styles.sectionTitle}>Notifications</Text>
           <View style={styles.switchRow}>
             <Text>Push Notifications</Text>
-            <Switch value={true} onValueChange={() => {}} />
+            <Switch value={isPushEnabled} onValueChange={(value) => setIsPushEnabled(value)} />
           </View>
           <View style={styles.switchRow}>
             <Text>Email Notifications</Text>
-            <Switch value={false} onValueChange={() => {}} />
+            <Switch value={isEmailEnabled} onValueChange={(value) => setIsEmailEnabled(value)} />
           </View>
         </View>
 
@@ -38,7 +43,7 @@ const Settings: React.FC = () => {
           <Text style={styles.sectionTitle}>Preferences</Text>
           <View style={styles.switchRow}>
             <Text>Dark Mode</Text>
-            <Switch value={false} onValueChange={() => {}} />
+            <Switch value={isDarkModeEnabled} onValueChange={(value) => setIsDarkModeEnabled(value)} />
           </View>
           <TextInput
             style={styles.input}
