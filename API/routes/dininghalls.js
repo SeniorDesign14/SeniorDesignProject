@@ -1,44 +1,23 @@
 import express from 'express';
+import DiningHalls from '../models/diningHalls.js';
 
 const router = express.Router();
 
 // all routes here begin with '/dininghalls'
-router.get('/', (req, res) => {
-  res.status(200).send({
-    'halls': [
-        {
-            'name': 'Connecticut',
-            'hours': 
-                {
-                'breakfast': '7:00am - 10:00am', 
-                'lunch': '11:00am - 2:00pm', 
-                'dinner': '5:00pm - 8:00pm'
-                },
-            'open': true
-        },
-        {
-            'name': 'McMahon',
-            'hours': 
-                {
-                'breakfast': '7:00am - 10:00am', 
-                'lunch': '11:00am - 2:00pm', 
-                'dinner': '5:00pm - 8:00pm'
-                },
-            'open': true
-        },
-        {
-            'name': 'South',
-            'hours':
-                {
-                'breakfast': '7:00am - 10:00am', 
-                'lunch': '11:00am - 2:00pm', 
-                'dinner': '5:00pm - 8:00pm',
-                'late night': '9:00pm - 12:00am'
-                },
-            'open': true
-        }
-    ]
-});
+router.get('/', async (req, res) => {
+    try {
+        const diningHalls = await DiningHalls.findAll(); // Wait for the data
+        console.log(diningHalls); // Logs the data retrieved
+        diningHalls.sort((a, b) => a.dininghallid - b.dininghallid); // Sort the data by dininghallid
+        res.status(200).send({
+            diningHalls // Send the data in the response
+        });
+    } catch (error) {
+        console.error('Error fetching dining halls:', error);
+        res.status(500).send({
+            error: 'Failed to fetch dining halls.'
+        });
+    }
 });
 
 router.get('/:hall', (req, res) => {
