@@ -1,11 +1,11 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../database'); // Import the connection to the database
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../database.js'; // Import the connection to the database
 
 class DiningHalls extends Model {}
 
 DiningHalls.init(
     {
-        diningHallId: {
+        dininghallid: {
             type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true,
@@ -22,8 +22,8 @@ DiningHalls.init(
     },
     {
         sequelize,
-        modelName: 'diningHalls',
+        modelName: 'dininghalls',
+        timestamps: false
     }
 );
-
-module.exports = DiningHalls;
+export default DiningHalls;
