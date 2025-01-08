@@ -1,5 +1,14 @@
 {
   "dependencies": {
-    "react-native-vector-icons": "^10.2.0"
+    "expo": "^52.0.23",
+    "react-native-vector-icons": "^10.2.0",
+    "react": "18.3.1",
+    "react-native": "0.76.5"
+  },
+  "name": "SeniorDesignProject",
+  "version": "1.0.0",
+  "scripts": {
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   }
 }
