@@ -1,33 +1,6 @@
-// import { View, Text, SafeAreaView } from 'react-native'
-// import React from 'react'
-
-// const Dining = () => {
-//   return (
-//     // Safe Area View to ensure content is within boundaries of device
-//     // (i.e. not behind the notch or status bar)
-//     <SafeAreaView>
-//       <Text>Dining</Text>
-//     </SafeAreaView>
-//   )
-// }
-
-// export default Dining
-
-import React from 'react';
+import { diningService } from '@/api/services/diningService';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView } from 'react-native';
-
-// List of dining halls with identifiers
-const diningHalls = [
-  { name: 'Connecticut', id: 'connecticut' },
-  { name: 'McMahon', id: 'mcmahon' },
-  { name: 'North', id: 'north' },
-  { name: 'Northwest', id: 'northwest' },
-  { name: 'Putnam', id: 'putnam' },
-  { name: 'South', id: 'south' },
-  { name: 'Towers', id: 'towers' }, // Towers = Gelfenbien
-  { name: 'Buckley', id: 'buckley' },
-  { name: 'Whitney', id: 'whitney' },
-];
 
 // Meal schedules based on time
 const schedules = {
@@ -97,18 +70,44 @@ const DiningItem = ({ name, id }: { name: string; id: string }) => (
   </View>
 );
 
+// Interface for dining hall data
+interface DiningHall {
+  dininghallid: number;
+  hallname: string;
+  location: string;
+}
+
 // Main screen component
 const DiningScreen = () => {
+  // State to store dining hall data
+  const [diningHalls, setDiningHalls] = useState<DiningHall[]>([]);
+
+  // Fetch dining hall data on component mount
+  useEffect(() => {
+    const fetchHalls = async () => {
+      try {
+        const response = await diningService.getDiningHalls();
+        setDiningHalls(response.diningHalls);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchHalls();
+  }, []);
+
+  // console.log(diningHalls);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>HuskyHotspot</Text>
         <Text style={styles.dateText}>{getCurrentDate()}</Text>
       </View>
-      <FlatList
+      <FlatList<DiningHall>
         data={diningHalls}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <DiningItem name={item.name} id={item.id} />}
+        keyExtractor={(item) => item.dininghallid.toString()}
+        renderItem={({ item }) => <DiningItem name={item.location} id={item.dininghallid.toString()} />}
       />
     </SafeAreaView>
   );
