@@ -11,7 +11,7 @@ DiningHalls.init(
             primaryKey: true,
             autoIncrement: true,
         },
-        name: {
+        hallname: {
             type: DataTypes.STRING,
             allowNull: false,
         },
