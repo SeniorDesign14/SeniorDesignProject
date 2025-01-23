@@ -52,7 +52,8 @@ ScheduleItems.init(
     },
     {
         sequelize,
-        modelName: 'schedule',
+        tableName: "schedule",
+        modelName: "schedule",
         timestamps: false
     }
 );
