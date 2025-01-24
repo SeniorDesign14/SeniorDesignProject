@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 // // }
 
 
+
 const Settings: React.FC = () => {
   const [isPushEnabled, setIsPushEnabled] = useState(true);
   const [isEmailEnabled, setIsEmailEnabled] = useState(false);
