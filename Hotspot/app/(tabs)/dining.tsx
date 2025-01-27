@@ -1,6 +1,7 @@
 import { diningService } from '@/api/services/diningService';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 
 // Meal schedules based on time
 const schedules = {
@@ -63,12 +64,22 @@ const getCurrentMeal = (hallId: string) => {
 };
 
 // Component for a single list item
-const DiningItem = ({ name, id }: { name: string; id: string }) => (
-  <View style={styles.item}>
+const DiningItem = ({ name, id }: { name: string; id: string }) => {
+  
+  const handlePress = () => {
+    router.push({
+      pathname: "../menu",
+      params: { name, id },
+    });
+  };
+
+  return (
+  <TouchableOpacity onPress={handlePress} style={styles.item}>
     <Text style={styles.title}>{name}</Text>
     <Text style={styles.subtitle}>{getCurrentMeal(id)}</Text>
-  </View>
-);
+  </TouchableOpacity>
+  );
+};
 
 // Interface for dining hall data
 interface DiningHall {
