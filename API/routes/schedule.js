@@ -1,6 +1,5 @@
 import express from 'express';
 import ScheduleItems from '../models/scheduleItems.js';
-import { format, parse } from 'date-fns';
 
 const router = express.Router();
 
@@ -10,7 +9,7 @@ router.get('/:diningHallId/:date', async (req, res) => {
             // grab dining hall
             // grab date
         const diningHallId = parseInt(req.params.diningHallId);
-        const date = formatDate(req.params.date);
+        const date = req.params.date;
         
         // Use request parameters to query schedule
         // return menu for the day for that dining hall
@@ -30,13 +29,5 @@ router.get('/:diningHallId/:date', async (req, res) => {
         });
     }
 });
-
-function formatDate(dateString) {
-    // parse input
-    const date = parse(dateString, 'yyyy-MM-dd', new Date());
-
-    // format the date to match database
-    return format(date, 'EEEE, MMMM d, yyyy');
-}
 
 export default router;
