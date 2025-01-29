@@ -1,0 +1,8 @@
+{
+  "android": {
+    "package": "com.anonymous.seniordesignproject"
+  },
+  "ios": {
+    "bundleIdentifier": "com.anonymous.seniordesignproject"
+  }
+}
