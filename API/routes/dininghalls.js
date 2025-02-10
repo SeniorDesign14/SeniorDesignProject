@@ -1,14 +1,15 @@
 import express from 'express';
-import DiningHalls from '../models/diningHalls.js';
+// import DiningHalls from '../models/init.js';
+// import DiningHours from '../models/init.js';
+import { DiningHalls, DiningHours } from '../models/init.js';
 
 const router = express.Router();
 
 // all routes here begin with '/dininghalls'
 router.get('/', async (req, res) => {
     try {
-        const diningHalls = await DiningHalls.findAll(); // Wait for the data
+        const diningHalls = await getDiningHallsAndHours(); // Wait for the data
         console.log(diningHalls); // Logs the data retrieved
-        diningHalls.sort((a, b) => a.dininghallid - b.dininghallid); // Sort the data by dininghallid
         res.status(200).send({
             diningHalls // Send the data in the response
         });
@@ -19,5 +20,20 @@ router.get('/', async (req, res) => {
         });
     }
 });
+
+async function getDiningHallsAndHours() {
+    // Get all dining halls with their hours
+    const diningHalls = await DiningHalls.findAll({
+        include: {
+            model: DiningHours,
+            as: 'hours'
+        }
+    });
+
+    // Sort the dining halls by dininghallid
+    diningHalls.sort((a, b) => a.dininghallid - b.dininghallid);
+
+    return diningHalls;
+}
 
 export default router;
