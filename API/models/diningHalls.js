@@ -27,11 +27,15 @@ DiningHalls.init(
     }
 );
 
-// define association to dininghours
+// define associations
 DiningHalls.associate = (models) => {
     DiningHalls.hasMany(models.DiningHours, {
         foreignKey: 'dininghallid',
         as: 'hours',
+    }),
+    DiningHalls.hasMany(models.DiningStations, {
+        foreignKey: 'dininghallid',
+        as: 'stations',
     });
 }
 

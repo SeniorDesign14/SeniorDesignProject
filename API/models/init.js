@@ -7,7 +7,8 @@ import ScheduleItems from "./scheduleItems.js";
 // Set up associations
 DiningHalls.associate({ DiningHours, DiningStations });
 DiningHours.associate({ DiningHalls });
-DiningStations.associate({ DiningHalls });
+DiningStations.associate({ DiningHalls, ScheduleItems });
+ScheduleItems.associate({ DiningStations });
 
 
 export { DiningHalls, DiningHours, ScheduleItems };
