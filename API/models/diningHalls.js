@@ -26,4 +26,13 @@ DiningHalls.init(
         timestamps: false
     }
 );
+
+// define association to dininghours
+DiningHalls.associate = (models) => {
+    DiningHalls.hasMany(models.DiningHours, {
+        foreignKey: 'dininghallid',
+        as: 'hours',
+    });
+}
+
 export default DiningHalls;
