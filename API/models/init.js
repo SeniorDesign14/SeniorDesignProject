@@ -11,4 +11,4 @@ DiningStations.associate({ DiningHalls, ScheduleItems });
 ScheduleItems.associate({ DiningStations });
 
 
-export { DiningHalls, DiningHours, ScheduleItems };
+export { DiningHalls, DiningHours, ScheduleItems, DiningStations };
