@@ -20,47 +20,4 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.get('/:hall', (req, res) => {
-  const hall = req.params.hall;
-  res.status(200).send({
-      'hall': hall,
-      'menu': {
-          'breakfast': {
-              'station1': [
-                  {
-                      'name': 'Pizza',
-                      'ingredients': ['cheese', 'tomato sauce', 'dough'],
-                      'allergens': ['dairy', 'wheat'],
-                      'vegan': false
-                  },
-                  {
-                      'name': 'Salad',
-                      'ingredients': ['lettuce', 'tomato', 'carrot', 'dressing'],
-                      'allergens': [],
-                      'vegan': true
-                  },
-                  {
-                      'name': 'Pasta',
-                      'ingredients': ['pasta', 'sauce'],
-                      'allergens': ['wheat'],
-                      'vegan': false
-                  }
-              ],
-              'station2': [
-
-              ],
-              'station3': [
-
-              ],
-          },
-          'lunch': [
-
-          ],
-          'dinner': [
-
-          ],
-      }
-  });
-});
-
 export default router;
