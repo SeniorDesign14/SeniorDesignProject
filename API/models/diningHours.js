@@ -1,29 +1,29 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../database'); // Import the connection to the database
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../database.js'; // Import the connection to the database
 
 class DiningHours extends Model {}
 
 DiningHours.init(
     {
-        diningHourId: {
+        dininghourid: {
             type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true,
             autoIncrement: true,
         },
-        diningHallId: {
+        dininghallid: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'DiningHalls', // Name of the target model
-                key: 'id', // Key in the target model that the foreign key refers to
+                model: 'dininghalls', // Name of the target model
+                key: 'dininghallid', // Key in the target model that the foreign key refers to
             },
         },
-        dayOfWeek: {
+        dayofweek: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        mealPeriod: {
+        mealperiod: {
             type: DataTypes.STRING,
             allowNull: false,
         },
@@ -34,8 +34,17 @@ DiningHours.init(
     },
     {
         sequelize,
-        modelName: 'diningHours',
+        modelName: 'dininghours',
+        timestamps: false
     }
 );
 
-module.exports = DiningHours;
+// define association to dininghalls
+DiningHours.associate = (models) => {
+    DiningHours.belongsTo(models.DiningHalls, {
+        foreignKey: 'dininghallid',
+        as: 'hall',
+    });
+}
+
+export default DiningHours;
