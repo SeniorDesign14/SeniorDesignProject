@@ -1,5 +1,5 @@
 import express from 'express';
-import ScheduleItems from '../models/scheduleItems.js';
+import { ScheduleItems, DiningStations } from '../models/init.js';
 
 const router = express.Router();
 
@@ -13,12 +13,7 @@ router.get('/:diningHallId/:date', async (req, res) => {
         
         // Use request parameters to query schedule
         // return menu for the day for that dining hall
-        const schedule = await ScheduleItems.findAll({
-            where: {
-                dininghallid: diningHallId,
-                scheduledate: date
-            }
-        });
+        const schedule = await getScheduleWithStations(diningHallId, date);
         res.status(200).send({
             schedule // Send the data in the response
         });
@@ -29,5 +24,21 @@ router.get('/:diningHallId/:date', async (req, res) => {
         });
     }
 });
+
+async function getScheduleWithStations(diningHallId, date) {
+    // Get all schedule items for a dining hall on a specific date
+    const schedule = await ScheduleItems.findAll({
+        where: {
+            dininghallid: diningHallId,
+            scheduledate: date
+        },
+        include: {
+            model: DiningStations,
+            as: 'station'
+        }
+    });
+
+    return schedule;
+}
 
 export default router;
