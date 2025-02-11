@@ -57,4 +57,13 @@ ScheduleItems.init(
         timestamps: false
     }
 );
+
+// Define associations
+ScheduleItems.associate = (models) => {
+    ScheduleItems.belongsTo(models.DiningStations, {
+        foreignKey: 'diningstationid',
+        as: 'station'
+    });
+};
+
 export default ScheduleItems;
