@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import {View, Text, SafeAreaView, StyleSheet, FlatList, TouchableOpacity, ScrollView,} from 'react-native';
+import React, { useState, useRef } from 'react';
+import {View, Text, SafeAreaView, StyleSheet, FlatList, TouchableOpacity, Animated} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 // const Summary = () => {
@@ -13,6 +13,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 const Summary: React.FC = () => {
   const [selectedWeek, setSelectedWeek] = useState('This Week');
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownHeight = useRef(new Animated.Value(0)).current;
+
   const [popularMeals, setPopularMeals] = useState([
     { id: '1', name: 'Pizza', votes: 120 },
     { id: '2', name: 'Burger', votes: 110 },
@@ -46,51 +48,49 @@ const Summary: React.FC = () => {
     }
   };
 
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
+    Animated.timing(dropdownHeight, {
+      toValue: showDropdown ? 0 : 120,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Summary</Text>
 
       {/* Dropdown Selector */}
       <View style={styles.dropdownContainer}>
-        <TouchableOpacity
-          style={styles.dropdownButton}
-          onPress={() => setShowDropdown(!showDropdown)}
-        >
+        <TouchableOpacity style={styles.dropdownButton} onPress={toggleDropdown}>
           <Text style={styles.dropdownButtonText}>{selectedWeek}</Text>
           <MaterialIcons
             name={showDropdown ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
             size={24}
             color="#333"
-            style={styles.arrowIcon}
           />
         </TouchableOpacity>
-        {showDropdown && (
-          <View style={styles.dropdownList}>
-            {weeks
-              .filter((week) => week !== selectedWeek) 
+        <Animated.View style={[styles.dropdownList, { height: dropdownHeight }]}>
+          {showDropdown &&
+            weeks
+              .filter((week) => week !== selectedWeek)
               .map((week) => (
-                <TouchableOpacity
-                  key={week}
-                  style={styles.dropdownItem}
-                  onPress={() => handleWeekChange(week)}
-                >
+                <TouchableOpacity key={week} style={styles.dropdownItem} onPress={() => handleWeekChange(week)}>
                   <Text style={styles.dropdownItemText}>{week}</Text>
                 </TouchableOpacity>
               ))}
-          </View>
-        )}
+        </Animated.View>
       </View>
 
       {/* Popular Meals Section */}
       <View style={styles.mealsContainer}>
-        <Text style={styles.sectionTitle}>
-          Most Popular Meals for {selectedWeek}
-        </Text>
+        <Text style={styles.sectionTitle}>Most Popular Meals for {selectedWeek}</Text>
         <FlatList
           data={popularMeals}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <View style={styles.mealItem}>
+            <View style={styles.mealCard}>
               <Text style={styles.mealName}>{item.name}</Text>
               <Text style={styles.mealVotes}>{item.votes} votes</Text>
             </View>
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f9f9f9',
-    padding: 10,
+    padding: 15,
   },
   header: {
     fontSize: 24,
@@ -115,7 +115,6 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     marginBottom: 20,
-    position: 'relative',
   },
   dropdownButton: {
     flexDirection: 'row',
@@ -124,23 +123,24 @@ const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   dropdownButtonText: {
     fontSize: 16,
     color: '#333',
   },
-  arrowIcon: {
-    marginLeft: 10,
-  },
   dropdownList: {
     marginTop: 5,
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    zIndex: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    overflow: 'hidden',
   },
   dropdownItem: {
     padding: 15,
@@ -154,12 +154,11 @@ const styles = StyleSheet.create({
   mealsContainer: {
     flex: 1,
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 10,
     padding: 15,
     shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
     elevation: 2,
   },
   sectionTitle: {
@@ -167,16 +166,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
   },
-  mealItem: {
+  mealCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    paddingBottom: 5,
+    padding: 15,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    marginVertical: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
   mealName: {
     fontSize: 16,
+    fontWeight: '600',
   },
   mealVotes: {
     fontSize: 16,
@@ -184,5 +188,4 @@ const styles = StyleSheet.create({
   },
 });
 
-
-export default Summary
+export default Summary;
