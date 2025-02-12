@@ -86,6 +86,7 @@ interface DiningHall {
   dininghallid: number;
   hallname: string;
   location: string;
+  hours: Array<Map<string, object>>;
 }
 
 // Main screen component
