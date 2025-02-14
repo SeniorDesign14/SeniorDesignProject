@@ -5,6 +5,7 @@ export default function RootLayout() {
     <Stack>
       <Stack.Screen name="index" />
       <Stack.Screen name="(tabs)" options={{ headerShown: false, gestureEnabled: false }} />
+      <Stack.Screen name="menu" options={{ headerShown: true, title: "Menu" }} />
     </Stack>
   );
 }

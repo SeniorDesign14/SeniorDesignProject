@@ -1,117 +1,93 @@
-// import { View, Text, SafeAreaView } from 'react-native'
-// import React from 'react'
+import { diningService } from '@/api/services/diningService';
+import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 
-// const Dining = () => {
-//   return (
-//     // Safe Area View to ensure content is within boundaries of device
-//     // (i.e. not behind the notch or status bar)
-//     <SafeAreaView>
-//       <Text>Dining</Text>
-//     </SafeAreaView>
-//   )
-// }
-
-// export default Dining
-
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView } from 'react-native';
-
-// List of dining halls with identifiers
-const diningHalls = [
-  { name: 'Connecticut', id: 'connecticut' },
-  { name: 'McMahon', id: 'mcmahon' },
-  { name: 'North', id: 'north' },
-  { name: 'Northwest', id: 'northwest' },
-  { name: 'Putnam', id: 'putnam' },
-  { name: 'South', id: 'south' },
-  { name: 'Towers', id: 'towers' }, // Towers = Gelfenbien
-  { name: 'Buckley', id: 'buckley' },
-  { name: 'Whitney', id: 'whitney' },
-];
-
-// Meal schedules based on time
-const schedules = {
-  weekday: {
-    connecticut: [
-      { name: 'Breakfast', start: 7, end: 10.75 },
-      { name: 'Lunch', start: 11, end: 14.5 },
-      { name: 'Dinner', start: 16, end: 19.25 },
-    ],
-    mcmahon: [
-      { name: 'Breakfast', start: 7, end: 10.75 },
-      { name: 'Lunch', start: 11, end: 14 },
-      { name: 'Dinner', start: 15.5, end: 19.25 },
-    ],
-    north: [
-      { name: 'Breakfast', start: 7, end: 10.75 },
-      { name: 'Lunch', start: 11, end: 15 },
-      { name: 'Dinner', start: 16.5, end: 19.25 },
-    ],
-    south: [
-      { name: 'Breakfast', start: 7, end: 10.75 },
-      { name: 'Lunch', start: 11, end: 14.25 },
-      { name: 'Dinner', start: 15.75, end: 22 },
-    ],
-  },
-  weekend: {
-    connecticut: [
-      { name: 'Brunch', start: 10.5, end: 14.5 },
-      { name: 'Dinner', start: 16, end: 19.25 },
-    ],
-    mcmahon: [
-      { name: 'Brunch', start: 10.5, end: 14 },
-      { name: 'Dinner', start: 15.5, end: 19.25 },
-    ],
-    south: [
-      { name: 'Breakfast', start: 7, end: 9.5 },
-      { name: 'Brunch', start: 9.5, end: 14.25 },
-      { name: 'Dinner', start: 15.75, end: 22 },
-    ],
-  },
-};
-
-// Function to determine the current meal
-const getCurrentMeal = (hallId: string) => {
-  const now = new Date();
-  const hour = now.getHours() + now.getMinutes() / 60; // Current time in decimal
-  const day = now.getDay(); // Sunday = 0, Monday = 1, ...
-
-  const schedule = day >= 1 && day <= 5 ? schedules.weekday[hallId] : schedules.weekend[hallId];
-
-  if (!schedule) return 'Closed'; // Default if no schedule exists
-
-  for (let meal of schedule) {
-    if (hour >= meal.start && hour < meal.end) {
-      return meal.name;
-    }
-  }
-
-  return 'Closed'; // If no meal matches the current time
-};
+// Interface for dining hall data
+interface DiningHall {
+  dininghallid: number;
+  hallname: string;
+  location: string;
+  hours: Array<{
+    dininghourid: number;
+    dininghallid: number;
+    dayofweek: string;
+    mealperiod: string;
+    hours: string;
+  }>;
+}
 
 // Component for a single list item
-const DiningItem = ({ name, id }: { name: string; id: string }) => (
-  <View style={styles.item}>
-    <Text style={styles.title}>{name}</Text>
-    <Text style={styles.subtitle}>{getCurrentMeal(id)}</Text>
-  </View>
-);
+const DiningItem = ({ name, id, diningHall }: { name: string; id: string; diningHall: DiningHall }) => {
+  
+  const handlePress = () => {
+    router.push({
+      pathname: "../menu",
+      params: { name, id },
+    });
+  };
+
+  const status = getStatus(diningHall);
+
+  return (
+  <TouchableOpacity onPress={handlePress} style={styles.itemBox}>
+    <View style={styles.item}>
+      <Text style={styles.title}>{name}</Text>
+      <Text style={styles.subtitle}>{status !== "Closed" ? "Open" : "Closed"}</Text>
+    </View>
+    <View style={styles.statusBox}>
+      <Text style={styles.subtitle}>{status === "Closed" ? "" : status}</Text>
+    </View>
+  </TouchableOpacity>
+  );
+};
 
 // Main screen component
 const DiningScreen = () => {
+  // State to store dining hall data
+  const [diningHalls, setDiningHalls] = useState<DiningHall[]>([]);
+
+  // Fetch dining hall data on component mount
+  useEffect(() => {
+    const fetchHalls = async () => {
+      try {
+        const response = await diningService.getDiningHalls();
+        setDiningHalls(response.diningHalls);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchHalls();
+  }, []);
+
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>HuskyHotspot</Text>
         <Text style={styles.dateText}>{getCurrentDate()}</Text>
       </View>
-      <FlatList
+      <FlatList<DiningHall>
         data={diningHalls}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <DiningItem name={item.name} id={item.id} />}
+        keyExtractor={(item) => item.dininghallid.toString()}
+        renderItem={({ item }) => <DiningItem name={item.location} id={item.dininghallid.toString()} diningHall={item}/>}
       />
     </SafeAreaView>
   );
+};
+
+// Function to parse time string to decimal
+const parseTime = (timeStr: string) => {
+  const [time, modifier] = timeStr.split(/(am|pm)/);
+  let [hours, minutes] = time.split(':').map(Number);
+  if (modifier === 'pm' && hours !== 12) {
+    hours += 12;
+  }
+  if (modifier === 'am' && hours === 12) {
+    hours = 0;
+  }
+  return hours + minutes / 60;
 };
 
 // Function to get the current date
@@ -123,6 +99,26 @@ const getCurrentDate = () => {
     day: 'numeric',
   };
   return today.toLocaleDateString(undefined, options);
+};
+
+// Function for getting the status of a dining hall (hours: open/closed)
+const getStatus = (hall: DiningHall) => {
+  const now = new Date();
+  const currentDay = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(now.getDay()); // Current day in text
+  const currentTime = now.getHours() + now.getMinutes() / 60; // Current time in decimal
+  
+  // Look for current day and time in the hall's hours
+  for (const hour of hall.hours) {
+    if (hour.dayofweek === currentDay) {
+      const [start, end] = hour.hours.split('-').map(parseTime);
+      if (currentTime >= start && currentTime <= end) {
+        return hour.hours;
+      }
+    }
+  }
+
+  // If not found, then dining hall is closed
+  return 'Closed';
 };
 
 // Styles
@@ -148,12 +144,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 4,
   },
+  itemBox: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+  },
   item: {
     paddingVertical: 12,
     paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#fff',
   },
   title: {
     fontSize: 18,
@@ -165,6 +165,11 @@ const styles = StyleSheet.create({
     color: '#888',
     marginTop: 4,
   },
+  statusBox: {
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 });
 
 export default DiningScreen;
