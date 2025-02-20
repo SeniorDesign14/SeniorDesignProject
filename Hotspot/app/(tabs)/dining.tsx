@@ -19,24 +19,25 @@ interface DiningHall {
 
 // Component for a single list item
 const DiningItem = ({ name, id, diningHall }: { name: string; id: string; diningHall: DiningHall }) => {
-  
-  const handlePress = () => {
-    router.push({
-      pathname: "../menu",
-      params: { name, id },
-    });
-  };
 
   const status = getStatus(diningHall);
+  
+  const handlePress = () => {
+    // console.log(`startTime: ${startTime}, endTime: ${endTime}`);
+    router.push({
+      pathname: "../menu",
+      params: { name, id, mealPeriod: status[0] },
+    });
+  };
 
   return (
   <TouchableOpacity onPress={handlePress} style={styles.itemBox}>
     <View style={styles.item}>
       <Text style={styles.title}>{name}</Text>
-      <Text style={styles.subtitle}>{status !== "Closed" ? "Open" : "Closed"}</Text>
+      <Text style={styles.subtitle}>{status !== "Closed" ? status[0] : "Closed"}</Text>
     </View>
     <View style={styles.statusBox}>
-      <Text style={styles.subtitle}>{status === "Closed" ? "" : status}</Text>
+      <Text style={styles.subtitle}>{status === "Closed" ? "" : status[1]}</Text>
     </View>
   </TouchableOpacity>
   );
@@ -112,7 +113,7 @@ const getStatus = (hall: DiningHall) => {
     if (hour.dayofweek === currentDay) {
       const [start, end] = hour.hours.split('-').map(parseTime);
       if (currentTime >= start && currentTime <= end) {
-        return hour.hours;
+        return [hour.mealperiod, hour.hours];
       }
     }
   }
