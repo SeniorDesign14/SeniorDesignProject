@@ -32,7 +32,7 @@ const formattedDate: string = format(date, 'yyyy-MM-dd');
 
 const menu = () => {
   // grab name and id from dining.tsx (from DiningItem component)
-  const { name, id } = useLocalSearchParams() as { name: string; id: string };
+  const { name, id, mealPeriod } = useLocalSearchParams() as { name: string; id: string, mealPeriod: string };
   const navigation = useNavigation();
 
   useLayoutEffect(() => {
@@ -56,15 +56,33 @@ const menu = () => {
 
     fetchSchedule();
   }, []);
-  
+
+  // Get meals based on current mealPeriod (breakfast, lunch, dinner) and sort into dictionary by dining station name
+  const getMeals = () => {
+    let filterMeals: { [key: string]: Schedule['food'][] } = {};
+    const meals = schedule.filter(item => item[`is${mealPeriod.toLowerCase()}` as keyof Schedule]);
+    meals.forEach(item => {
+      if (filterMeals[item.station.stationname]) {
+        filterMeals[item.station.stationname].push(item.food);
+      } else {
+        filterMeals[item.station.stationname] = [item.food];
+      }
+    });
+    return filterMeals;
+  }
 
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>{formattedDate}</Text>
-      {schedule.map((item, index) => (
-      <Text key={index} style={styles.item}>
-        - {item.food}
-      </Text>
+      {Object.entries(getMeals()).map(([station, foods], index) => (
+        <View key={index}>
+          <Text style={styles.item}>{station}</Text>
+          {foods.map((food, foodIndex) => (
+            <Text key={foodIndex} style={styles.item}>
+              - {food}
+            </Text>
+          ))}
+        </View>
       ))}
     </ScrollView>
   );
