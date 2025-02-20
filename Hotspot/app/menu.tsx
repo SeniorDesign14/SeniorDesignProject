@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native'
 import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { scheduleService } from '@/api/services/scheduleService';
 import { format } from 'date-fns';
+import { TabBar, TabView } from 'react-native-tab-view';
 
 
 // Interface for dining hall data
@@ -32,7 +33,7 @@ const formattedDate: string = format(date, 'yyyy-MM-dd');
 
 const menu = () => {
   // grab name and id from dining.tsx (from DiningItem component)
-  const { name, id, mealPeriod } = useLocalSearchParams() as { name: string; id: string, mealPeriod: string };
+  const { name, id, mealPeriod } = useLocalSearchParams() as { name: string; id: string; mealPeriod: string };
   const navigation = useNavigation();
 
   useLayoutEffect(() => {
@@ -42,6 +43,15 @@ const menu = () => {
   }, [name, navigation]);
 
   const [schedule, setSchedule] = useState<Schedule[]>([]);
+  const [routes] = useState([
+    { key: 'breakfast', title: 'Breakfast' },
+    { key: 'lunch', title: 'Lunch' },
+    { key: 'dinner', title: 'Dinner' },
+  ]);
+
+  // Set initial tab index based from dining screen mealPeriod (breakfast, lunch, dinner)
+  const initialIndex = routes.findIndex(route => route.key === mealPeriod.toLowerCase());
+  const [index, setIndex] = useState(initialIndex !== -1 ? initialIndex : 0);
   
   // Fetch dining hall data on component mount
   useEffect(() => {
@@ -55,12 +65,12 @@ const menu = () => {
     };
 
     fetchSchedule();
-  }, []);
+  }, [id]);
 
   // Get meals based on current mealPeriod (breakfast, lunch, dinner) and sort into dictionary by dining station name
-  const getMeals = () => {
+  const getMeals = (mealP: string) => {
     let filterMeals: { [key: string]: Schedule['food'][] } = {};
-    const meals = schedule.filter(item => item[`is${mealPeriod.toLowerCase()}` as keyof Schedule]);
+    const meals = schedule.filter(item => item[`is${mealP.toLowerCase()}` as keyof Schedule]);
     meals.forEach(item => {
       if (filterMeals[item.station.stationname]) {
         filterMeals[item.station.stationname].push(item.food);
@@ -69,22 +79,45 @@ const menu = () => {
       }
     });
     return filterMeals;
-  }
+  };
+
+  const renderScene = ({ route }: { route: { key: string } }) => {
+    const mealP = route.key;
+    const meals = getMeals(mealP);
+
+    return (
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>{formattedDate}</Text>
+        {Object.entries(meals).map(([station, foods], index) => (
+          <View key={index}>
+            <Text style={styles.item}>{station}</Text>
+            {foods.map((food, foodIndex) => (
+              <Text key={foodIndex} style={styles.item}>
+                - {food}
+              </Text>
+            ))}
+          </View>
+        ))}
+      </ScrollView>
+    );
+  };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>{formattedDate}</Text>
-      {Object.entries(getMeals()).map(([station, foods], index) => (
-        <View key={index}>
-          <Text style={styles.item}>{station}</Text>
-          {foods.map((food, foodIndex) => (
-            <Text key={foodIndex} style={styles.item}>
-              - {food}
-            </Text>
-          ))}
-        </View>
-      ))}
-    </ScrollView>
+    <TabView
+      navigationState={{ index, routes }}
+      renderScene={renderScene}
+      onIndexChange={setIndex}
+      initialLayout={{ width: Dimensions.get('window').width }}
+      renderTabBar={props => (
+        <TabBar
+          {...props}
+          activeColor='white'
+          inactiveColor='gray'
+          indicatorStyle={{ backgroundColor: '#001F54', height: '100%', borderRadius: 10 }}
+          style={{ backgroundColor: 'white', borderRadius: 10, margin: 10 }}
+        />
+      )}
+    />
   );
 };
 

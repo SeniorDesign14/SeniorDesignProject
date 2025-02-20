@@ -23,10 +23,9 @@ const DiningItem = ({ name, id, diningHall }: { name: string; id: string; dining
   const status = getStatus(diningHall);
   
   const handlePress = () => {
-    // console.log(`startTime: ${startTime}, endTime: ${endTime}`);
     router.push({
       pathname: "../menu",
-      params: { name, id, mealPeriod: status[0] },
+      params: { name, id, mealPeriod: status !== "Closed" ? status[0] : "Breakfast" },
     });
   };
 
