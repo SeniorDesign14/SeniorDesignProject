@@ -11,6 +11,8 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+load_dotenv()
+
 logging.basicConfig(level=logging.DEBUG)
 
 def get_dataframes():
