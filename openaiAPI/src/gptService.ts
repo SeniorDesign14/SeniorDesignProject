@@ -1,5 +1,8 @@
 import OpenAI from "openai";
 import dotenv from "dotenv";
+import MenuItem from "./models/menuItem";
+import { QueryTypes } from "sequelize";
+import sequelize from "./db";
 
 dotenv.config();
 
