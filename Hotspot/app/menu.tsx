@@ -31,6 +31,16 @@ interface Schedule {
 // const date = new Date();
 // // const formattedDate: string = format(date, 'yyyy-MM-dd');
 
+// converts datestring from "yyyy-MM-dd" to "Tuesday, Mar 13"
+const formatToTextDate = (datestring: string) => {
+  const date = new Date(datestring + "T00:00:00");
+  return new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  }).format(date);
+};
+
 const menu = () => {
   // grab name and id from dining.tsx (from DiningItem component)
   const { name, id, mealPeriod, selectedDate } = useLocalSearchParams() as { name: string; id: string; mealPeriod: string; selectedDate?: string, };
@@ -90,7 +100,7 @@ const menu = () => {
 
     return (
       <ScrollView style={styles.container}>
-        <Text style={styles.title}>{formattedDate}</Text>
+        <Text style={styles.title}>{formatToTextDate(formattedDate)}</Text>
         {Object.entries(meals).map(([station, foods], index) => (
           <View key={index}>
             <Text style={styles.item}>{station}</Text>
