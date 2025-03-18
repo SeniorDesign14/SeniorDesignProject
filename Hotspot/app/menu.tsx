@@ -27,14 +27,17 @@ interface Schedule {
   }
 }
 
-// Identify date
-const date = new Date();
-const formattedDate: string = format(date, 'yyyy-MM-dd');
+// Identify date - now used inside method
+// const date = new Date();
+// // const formattedDate: string = format(date, 'yyyy-MM-dd');
 
 const menu = () => {
   // grab name and id from dining.tsx (from DiningItem component)
-  const { name, id, mealPeriod } = useLocalSearchParams() as { name: string; id: string; mealPeriod: string };
+  const { name, id, mealPeriod, selectedDate } = useLocalSearchParams() as { name: string; id: string; mealPeriod: string; selectedDate?: string, };
   const navigation = useNavigation();
+  
+  // Convert selectedDate to proper format or use current date if not provided
+  const formattedDate = selectedDate ? selectedDate : format(new Date(), 'yyyy-MM-dd');
 
   useLayoutEffect(() => {
     if (name) {
@@ -65,7 +68,7 @@ const menu = () => {
     };
 
     fetchSchedule();
-  }, [id]);
+  }, [id, formattedDate]);
 
   // Get meals based on current mealPeriod (breakfast, lunch, dinner) and sort into dictionary by dining station name
   const getMeals = (mealP: string) => {
