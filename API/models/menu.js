@@ -5,7 +5,7 @@ class Menu extends Model {}
  
 Menu.init(
     {
-        foodID: {
+        foodid: {
             type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true,
@@ -19,6 +19,7 @@ Menu.init(
     {
         sequelize,
         modelName: 'menu',
+        tableName: 'menu',
         timestamps: false,
     }
 );
