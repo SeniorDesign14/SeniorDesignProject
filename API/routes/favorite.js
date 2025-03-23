@@ -3,6 +3,7 @@ import { FavoriteFoods, Users } from '../models/init.js';
 
 const router = express.Router();
 
+// Create a favorite food
 router.post('/', async (req, res) => {
     try {
         const { userid, foodid, food, dininghallid } = req.body;
@@ -23,11 +24,15 @@ router.post('/', async (req, res) => {
     }
 });
 
-// TESTING: get all favorite foods
-router.get('/', async (req, res) => {
+// TESTING: get all favorite foods from a user
+router.get('/:userid', async (req, res) => {
     try {
-        const favoriteFoods = await FavoriteFoods.findAll();
-        console.log(favoriteFoods);
+        const { userid } = req.params;
+        const favoriteFoods = await FavoriteFoods.findAll({
+            where: {
+                userid
+            }
+        });
         res.status(200).send({
             favoriteFoods
         });
