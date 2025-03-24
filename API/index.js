@@ -2,7 +2,7 @@ import express, { json } from 'express';
 import dininghallsRoutes from './routes/dininghalls.js';
 import scheduleRoutes from './routes/schedule.js';
 import cors from 'cors';
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3030;
 
 const app = express();
 app.use(json());

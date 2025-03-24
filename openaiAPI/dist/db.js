@@ -30,11 +30,11 @@ if (require.main === module) { // Ensures this runs only when executed directly
     (() => __awaiter(void 0, void 0, void 0, function* () {
         try {
             yield sequelize.authenticate();
-            console.log("✅ Database connection successful!");
+            console.log("Database connection successful!");
             process.exit(0);
         }
         catch (error) {
-            console.error("❌ Database connection failed:", error);
+            console.error("Database connection failed:", error);
             process.exit(1);
         }
     }))();

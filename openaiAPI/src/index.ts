@@ -24,6 +24,7 @@ app.post("/gpt", async (req, res) => {
   res.json({ response: "GPT API working!" });
 });
 
+// look at src/routes
 app.use("/menu", menuRoutes);
 app.use("/api", chatRoutes);
 
