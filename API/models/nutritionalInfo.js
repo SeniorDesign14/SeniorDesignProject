@@ -5,7 +5,7 @@ class NutritionalInfo extends Model {}
  
 NutritionalInfo.init(
     {
-        foodID: {
+        foodid: {
             type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true,
@@ -131,6 +131,7 @@ NutritionalInfo.init(
     {
         sequelize,
         modelName: 'nutritionalinfo',
+        tableName: 'nutritionalinfo',
         timestamps: false
     }
 );
