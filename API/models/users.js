@@ -1,6 +1,7 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../database.js'; // Import the connection to the database
 
+ 
 class Users extends Model {}
 
 Users.init(
@@ -39,8 +40,11 @@ Users.init(
     {
         sequelize,
         modelName: 'users',
-        timestamps: true // need timestamps for createdat, updatedat
+        timestamps: true, // need timestamps for createdat, updatedat
+        // connect the timestamps to the database columns
+        createdAt: 'createdat',
+        updatedAt: 'updatedat',
     }
 );
-
+ 
 export default Users;

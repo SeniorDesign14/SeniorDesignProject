@@ -1,6 +1,10 @@
 import express, { json } from 'express';
 import dininghallsRoutes from './routes/dininghalls.js';
 import scheduleRoutes from './routes/schedule.js';
+import userRoutes from './routes/user.js';
+import favoriteRoutes from './routes/favorite.js';
+import menuRoutes from './routes/menu.js';
+import nutritionalRoutes from './routes/nutritional.js';
 import cors from 'cors';
 const PORT = process.env.PORT || 3000;
 
@@ -15,6 +19,14 @@ app.listen(PORT, () => {
 app.use('/dininghalls', dininghallsRoutes);
 
 app.use('/schedule', scheduleRoutes);
+
+app.use('/user', userRoutes);
+
+app.use('/favorite', favoriteRoutes);
+
+app.use('/menu', menuRoutes);
+
+app.use('/nutritional', nutritionalRoutes);
 
 app.get('/status', (req, res) => {
     res.status(200).send({'body': 'The server is running!'});

@@ -1,11 +1,11 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../database.js'; // Import the connection to the database
-
+ 
 class NutritionalInfo extends Model {}
-
+ 
 NutritionalInfo.init(
     {
-        foodID: {
+        foodid: {
             type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true,
@@ -131,10 +131,11 @@ NutritionalInfo.init(
     {
         sequelize,
         modelName: 'nutritionalinfo',
+        tableName: 'nutritionalinfo',
         timestamps: false
     }
 );
-
+ 
 // define association with menu once its up
-
+ 
 export default NutritionalInfo;
