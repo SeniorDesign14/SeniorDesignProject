@@ -3,6 +3,8 @@ import dininghallsRoutes from './routes/dininghalls.js';
 import scheduleRoutes from './routes/schedule.js';
 import usersRoutes from './routes/users.js';
 import favoriteRoutes from './routes/favorite.js';
+import menuRoutes from './routes/menu.js';
+import nutritionalRoutes from './routes/nutritional.js';
 import cors from 'cors';
 import Users from './models/users.js';
 import axios from 'axios';
@@ -47,6 +49,10 @@ app.use('/schedule', scheduleRoutes);
 app.use('/users', usersRoutes);
 
 app.use('/favorite', favoriteRoutes);
+
+app.use('/menu', menuRoutes);
+
+app.use('/nutritional', nutritionalRoutes);
 
 app.get('/status', (req, res) => {
     res.status(200).send({'body': 'The server is running!'});
