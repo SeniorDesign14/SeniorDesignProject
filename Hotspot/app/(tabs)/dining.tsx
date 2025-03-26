@@ -1,4 +1,5 @@
 import { diningService } from '@/api/services/diningService';
+import { format } from 'date-fns';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
@@ -29,7 +30,7 @@ const DiningItem = ({ name, id, diningHall, selectedDate }: { name: string; id: 
         name, 
         id, 
         mealPeriod: status !== "Closed" ? status[0] : "Breakfast",
-        selectedDate: selectedDate.toISOString().split('T')[0] // format as yyyy-mm-dd, is an easier way than calculating it before
+        selectedDate: format(selectedDate, 'yyyy-MM-dd')
       },
     });
   };
