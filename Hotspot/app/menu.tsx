@@ -150,6 +150,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#001F54', // Dark blue to match the theme
     marginBottom: 10,
+    textAlign: 'center',
   },
   section: {
     marginBottom: 8,
