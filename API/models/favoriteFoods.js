@@ -5,7 +5,7 @@ class FavoriteFoods extends Model {}
 
 FavoriteFoods.init(
     {
-        userid: {
+        netid: {
             type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true,

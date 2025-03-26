@@ -18,14 +18,19 @@ interface DiningHall {
 }
 
 // Component for a single list item
-const DiningItem = ({ name, id, diningHall }: { name: string; id: string; diningHall: DiningHall }) => {
+const DiningItem = ({ name, id, diningHall, selectedDate }: { name: string; id: string; diningHall: DiningHall, selectedDate: Date }) => {
 
-  const status = getStatus(diningHall);
+  const status = getStatus(diningHall, selectedDate);
   
   const handlePress = () => {
     router.push({
       pathname: "../menu",
-      params: { name, id, mealPeriod: status !== "Closed" ? status[0] : "Breakfast" },
+      params: { 
+        name, 
+        id, 
+        mealPeriod: status !== "Closed" ? status[0] : "Breakfast",
+        selectedDate: selectedDate.toISOString().split('T')[0] // format as yyyy-mm-dd, is an easier way than calculating it before
+      },
     });
   };
 
@@ -44,6 +49,24 @@ const DiningItem = ({ name, id, diningHall }: { name: string; id: string; dining
 
 // Main screen component
 const DiningScreen = () => {
+
+  // State to store a specified date
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // Function for previous day arrow
+  const handlePrevDay = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() - 1);
+    setSelectedDate(newDate);
+  };
+
+  // Function for next day arrow
+  const handleNextDay = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() + 1);
+    setSelectedDate(newDate);
+  };
+
   // State to store dining hall data
   const [diningHalls, setDiningHalls] = useState<DiningHall[]>([]);
 
@@ -64,14 +87,30 @@ const DiningScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+
+
       <View style={styles.header}>
-        <Text style={styles.headerText}>HuskyHotspot</Text>
-        <Text style={styles.dateText}>{getCurrentDate()}</Text>
+
+
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={handlePrevDay}>
+            <Text style={styles.arrow}>&lt;</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerText}>HuskyHotspot</Text>
+          <TouchableOpacity onPress={handleNextDay}>
+            <Text style={styles.arrow}>&gt;</Text>
+          </TouchableOpacity>
+        </View>
+
+
+        <Text style={styles.dateText}>{getCurrentDate(selectedDate)}</Text>
       </View>
+
+
       <FlatList<DiningHall>
         data={diningHalls}
         keyExtractor={(item) => item.dininghallid.toString()}
-        renderItem={({ item }) => <DiningItem name={item.location} id={item.dininghallid.toString()} diningHall={item}/>}
+        renderItem={({ item }) => <DiningItem name={item.location} id={item.dininghallid.toString()} diningHall={item} selectedDate={selectedDate}/>}
       />
     </SafeAreaView>
   );
@@ -91,21 +130,21 @@ const parseTime = (timeStr: string) => {
 };
 
 // Function to get the current date
-const getCurrentDate = () => {
-  const today = new Date();
+const getCurrentDate = (date: Date) => {
+  // const today = new Date();
   const options: Intl.DateTimeFormatOptions = {
     weekday: 'long',
     month: 'short',
     day: 'numeric',
   };
-  return today.toLocaleDateString(undefined, options);
+  return date.toLocaleDateString(undefined, options);
 };
 
 // Function for getting the status of a dining hall (hours: open/closed)
-const getStatus = (hall: DiningHall) => {
-  const now = new Date();
-  const currentDay = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(now.getDay()); // Current day in text
-  const currentTime = now.getHours() + now.getMinutes() / 60; // Current time in decimal
+const getStatus = (hall: DiningHall, selectedDate: Date) => {
+  // const now = new Date();
+  const currentDay = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(selectedDate); // Current day in text
+  const currentTime = selectedDate.getHours() + selectedDate.getMinutes() / 60; // Current time in decimal
   
   // Look for current day and time in the hall's hours
   for (const hour of hall.hours) {
@@ -120,6 +159,8 @@ const getStatus = (hall: DiningHall) => {
   // If not found, then dining hall is closed
   return 'Closed';
 };
+
+
 
 // Styles
 const styles = StyleSheet.create({
@@ -169,6 +210,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  arrow: {
+    color: '#fff',
+    fontSize: 24,
+    paddingHorizontal: 16,
   }
 });
 
