@@ -6,9 +6,9 @@ const router = express.Router();
 // Create a favorite food
 router.post('/', async (req, res) => {
     try {
-        const { userid, foodid, food, dininghallid } = req.body;
+        const { netid, foodid, food, dininghallid } = req.body;
         const favoriteFood = await FavoriteFoods.create({
-            userid,
+            netid,
             foodid,
             food,
             dininghallid

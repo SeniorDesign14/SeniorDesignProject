@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, Dimensions, FlatList } from 'react-native'
 import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { scheduleService } from '@/api/services/scheduleService';
@@ -27,14 +27,27 @@ interface Schedule {
   }
 }
 
-// Identify date
-const date = new Date();
-const formattedDate: string = format(date, 'yyyy-MM-dd');
+// Identify date - now used inside method
+// const date = new Date();
+// // const formattedDate: string = format(date, 'yyyy-MM-dd');
+
+// converts datestring from "yyyy-MM-dd" to "Tuesday, Mar 13"
+const formatToTextDate = (datestring: string) => {
+  const date = new Date(datestring + "T00:00:00");
+  return new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  }).format(date);
+};
 
 const menu = () => {
   // grab name and id from dining.tsx (from DiningItem component)
-  const { name, id, mealPeriod } = useLocalSearchParams() as { name: string; id: string; mealPeriod: string };
+  const { name, id, mealPeriod, selectedDate } = useLocalSearchParams() as { name: string; id: string; mealPeriod: string; selectedDate?: string, };
   const navigation = useNavigation();
+  
+  // Convert selectedDate to proper format or use current date if not provided
+  const formattedDate = selectedDate ? selectedDate : format(new Date(), 'yyyy-MM-dd');
 
   useLayoutEffect(() => {
     if (name) {
@@ -65,7 +78,7 @@ const menu = () => {
     };
 
     fetchSchedule();
-  }, [id]);
+  }, [id, formattedDate]);
 
   // Get meals based on current mealPeriod (breakfast, lunch, dinner) and sort into dictionary by dining station name
   const getMeals = (mealP: string) => {
@@ -87,20 +100,25 @@ const menu = () => {
 
     return (
       <ScrollView style={styles.container}>
-        <Text style={styles.title}>{formattedDate}</Text>
+        <Text style={styles.date}>{formatToTextDate(formattedDate)}</Text>
+
         {Object.entries(meals).map(([station, foods], index) => (
-          <View key={index}>
-            <Text style={styles.item}>{station}</Text>
-            {foods.map((food, foodIndex) => (
-              <Text key={foodIndex} style={styles.item}>
-                - {food}
-              </Text>
-            ))}
+          <View key={index} style={styles.section}>
+            <Text style={styles.stationName}>{station}</Text>
+            <FlatList
+              data={foods}
+              keyExtractor={(item, idx) => `${station}-${idx}`}
+              renderItem={({ item }) => (
+                <View style={styles.menuItem}>
+                  <Text style={styles.foodText}>{item}</Text>
+                </View>
+              )}
+            />
           </View>
         ))}
       </ScrollView>
     );
-  };
+};
 
   return (
     <TabView
@@ -125,16 +143,37 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: '#fff',
   },
-  title: {
-    fontSize: 24,
+  date: {
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 16,
+    color: '#001F54', // Dark blue to match the theme
+    marginBottom: 10,
   },
-  item: {
-    fontSize: 18,
+  section: {
     marginBottom: 8,
   },
+  stationName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#001F54', // Dark blue to match the theme
+    marginBottom: 8,
+  },
+  menuItem: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0', // Light gray separator
+    backgroundColor: '#f9f9f9', // Slightly off-white for contrast
+    borderRadius: 5, // Rounded edges for a softer UI
+    marginVertical: 0, // Space between items
+  },
+  foodText: {
+    fontSize: 18,
+    color: '#333',
+  },
 });
+
 
 export default menu
