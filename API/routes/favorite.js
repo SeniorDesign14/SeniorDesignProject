@@ -6,9 +6,9 @@ const router = express.Router();
 // Create a favorite food
 router.post('/', async (req, res) => {
     try {
-        const { userid, foodid, food, dininghallid } = req.body;
+        const { netid, foodid, food, dininghallid } = req.body;
         const favoriteFood = await FavoriteFoods.create({
-            userid,
+            netid,
             foodid,
             food,
             dininghallid
@@ -25,12 +25,12 @@ router.post('/', async (req, res) => {
 });
 
 // TESTING: get all favorite foods from a user
-router.get('/:userid', async (req, res) => {
+router.get('/:netid', async (req, res) => {
     try {
-        const { userid } = req.params;
+        const { netid } = req.params;
         const favoriteFoods = await FavoriteFoods.findAll({
             where: {
-                userid
+                netid
             }
         });
         res.status(200).send({
