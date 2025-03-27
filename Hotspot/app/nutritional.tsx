@@ -1,4 +1,5 @@
 import { nutritionalService } from '@/api/services/nutritionalService';
+import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 
@@ -36,16 +37,20 @@ interface NutritionalInfo {
 }
 
 const nutritional = () => {
+  const { foodid } = useLocalSearchParams(); // Get the foodid from the URL params (when redirected from menu screen)
   // fetch nutritional info
   const [nutritionalInfo, setNutritionalInfo] = useState<NutritionalInfo | null>(null);
 
   useEffect(() => {
     const fetchNutritionalInfo = async () => {
       try {
-        const foodid = '2902';
-        const response = await nutritionalService.getNutritional(foodid);
-        setNutritionalInfo(response.nutritionalInfo);
-        console.log(response.nutritionalInfo);
+        if (typeof foodid === 'string') {
+          const response = await nutritionalService.getNutritional(foodid);
+          setNutritionalInfo(response.nutritionalInfo);
+          console.log(response.nutritionalInfo);
+        } else {
+          console.error('Invalid foodid format');
+        }
       } catch (error) {
         console.error(error);
       }
