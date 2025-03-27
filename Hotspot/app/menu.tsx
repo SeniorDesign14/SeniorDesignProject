@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, Dimensions, FlatList } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, Dimensions, FlatList, TouchableOpacity } from 'react-native'
 import React, { useEffect, useLayoutEffect, useState } from 'react'
-import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { scheduleService } from '@/api/services/scheduleService';
 import { format } from 'date-fns';
 import { TabBar, TabView } from 'react-native-tab-view';
+import { FontAwesome } from '@expo/vector-icons';
 
 
 // Interface for dining hall data
@@ -25,6 +26,11 @@ interface Schedule {
     dininghallid: number,
     stationname: string
   }
+}
+
+interface Food {
+  foodid: number,
+  food: string
 }
 
 // Identify date - now used inside method
@@ -82,16 +88,26 @@ const menu = () => {
 
   // Get meals based on current mealPeriod (breakfast, lunch, dinner) and sort into dictionary by dining station name
   const getMeals = (mealP: string) => {
-    let filterMeals: { [key: string]: Schedule['food'][] } = {};
+    let filterMeals: { [key: string]: Food[] } = {};
     const meals = schedule.filter(item => item[`is${mealP.toLowerCase()}` as keyof Schedule]);
     meals.forEach(item => {
       if (filterMeals[item.station.stationname]) {
-        filterMeals[item.station.stationname].push(item.food);
+        filterMeals[item.station.stationname].push({ foodid: item.foodid, food: item.food });
       } else {
-        filterMeals[item.station.stationname] = [item.food];
+        filterMeals[item.station.stationname] = [{ foodid: item.foodid, food: item.food }];
       }
     });
     return filterMeals;
+  };
+
+  // Local state to track toggled icons
+  const [toggledStates, setToggledStates] = useState<{ [key: string]: boolean }>({});
+
+  const toggleIcon = (food: string) => {
+    setToggledStates((prevState) => ({
+      ...prevState,
+      [food]: !prevState[food], // Toggle the state for the specific food item
+    }));
   };
 
   const renderScene = ({ route }: { route: { key: string } }) => {
@@ -108,10 +124,22 @@ const menu = () => {
             <FlatList
               data={foods}
               keyExtractor={(item, idx) => `${station}-${idx}`}
-              renderItem={({ item }) => (
-                <View style={styles.menuItem}>
-                  <Text style={styles.foodText}>{item}</Text>
-                </View>
+              renderItem={({ item }: { item: Food }) => (
+                <TouchableOpacity style={styles.menuItem} onPress={ () => {
+                  router.push({
+                    pathname: "../nutritional",
+                    params: { foodid: item.foodid },
+                  }); // Add navigation to nutritional page
+                }}>
+                  <Text style={styles.foodText}>{item.food}</Text>
+                    <TouchableOpacity onPress={() => toggleIcon(item.food)} style={styles.icon}>
+                      <FontAwesome
+                        name={toggledStates[item.food] ? 'star' : 'star-o'}
+                        size={24}
+                        color={toggledStates[item.food] ? 'gold' : 'gray'}
+                      />
+                    </TouchableOpacity>
+                </TouchableOpacity>
               )}
             />
           </View>
@@ -169,11 +197,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9', // Slightly off-white for contrast
     borderRadius: 5, // Rounded edges for a softer UI
     marginVertical: 0, // Space between items
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   foodText: {
     fontSize: 18,
     color: '#333',
   },
+  icon: {
+    marginLeft: 10,
+  }
 });
 
 
