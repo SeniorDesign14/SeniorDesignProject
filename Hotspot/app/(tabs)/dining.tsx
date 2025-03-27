@@ -1,8 +1,9 @@
 import { diningService } from '@/api/services/diningService';
+import { FontAwesome } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, Dimensions } from 'react-native';
 
 // Interface for dining hall data
 interface DiningHall {
@@ -85,6 +86,23 @@ const DiningScreen = () => {
     fetchHalls();
   }, []);
 
+  // Handlers for the icons
+  const handleSearchPress = () => {
+    // navigate to foodQuery screen
+    router.push({
+      pathname: "../foodQuery",
+    });
+  };
+
+  const handleFavoritePress = () => {
+    // navigate to favorited screen
+    router.push({
+      pathname: "../favorited",
+    });
+  };
+
+  const { width } = Dimensions.get('window');
+  const iconSize = width < 500 ? 20 : 24;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -94,13 +112,24 @@ const DiningScreen = () => {
 
 
         <View style={styles.headerRow}>
-          <TouchableOpacity onPress={handlePrevDay}>
-            <Text style={styles.arrow}>&lt;</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerText}>HuskyHotspot</Text>
-          <TouchableOpacity onPress={handleNextDay}>
-            <Text style={styles.arrow}>&gt;</Text>
-          </TouchableOpacity>
+          <View style={styles.centerContainer}>
+            <TouchableOpacity onPress={handlePrevDay}>
+              <Text style={styles.arrow}>&lt;</Text>
+            </TouchableOpacity>
+            <Text style={styles.headerText}>HuskyHotspot</Text>
+            <TouchableOpacity onPress={handleNextDay}>
+              <Text style={styles.arrow}>&gt;</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.iconContainer}>
+            <TouchableOpacity onPress={handleSearchPress}>
+              <FontAwesome name="search" size={iconSize} color="#fff" style={styles.icon} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleFavoritePress}>
+              <FontAwesome name="star" size={iconSize} color="#fff" style={styles.icon} />
+            </TouchableOpacity>
+          </View>
         </View>
 
 
@@ -215,12 +244,30 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  centerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    left: 0,
+    right: 0,
   },
   arrow: {
     color: '#fff',
     fontSize: 24,
     paddingHorizontal: 16,
-  }
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 'auto',
+  },
+  icon: {
+    marginLeft: Dimensions.get('window').width < 500 ? 10 : 16,
+  },
 });
 
 export default DiningScreen;
