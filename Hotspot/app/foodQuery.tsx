@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { menuService } from '@/api/services/menuService';
 import { favoritedService } from '@/api/services/favoritedService';
 import { FontAwesome } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 interface FoodItem {
   foodid: number;
@@ -78,7 +79,14 @@ const foodQuery = () => {
         data={filteredFood}
         keyExtractor={(item) => item.foodid.toString()}
         renderItem={({ item }) => (
-          <View style={styles.item}>
+          <TouchableOpacity style={styles.item} onPress={() => {
+            // navigate to nutrional page
+            router.push({
+              pathname: "../nutritional",
+              params: { foodid: item.foodid },
+            });
+
+          }}>
             <Text style={styles.foodText}>{item.food}</Text>
             <TouchableOpacity onPress={() => toggleFavorite(item)}>
               <FontAwesome
@@ -87,7 +95,7 @@ const foodQuery = () => {
                 color={item.isFavorited ? 'gold' : 'gray'}
               />
             </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         )}
       />
     </View>
