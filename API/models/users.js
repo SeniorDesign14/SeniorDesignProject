@@ -1,23 +1,15 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../database.js'; // Import the connection to the database
+
  
 class Users extends Model {}
- 
+
 Users.init(
     {
         netid: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
+            type: DataTypes.STRING,
             primaryKey: true,
-            autoIncrement: true,
-        },
-        ssouserid: {
-            type: DataTypes.STRING,
             allowNull: false,
-        },
-        username: {
-            type: DataTypes.STRING,
-            allowNull: true, // if we have ssouserid we dont need username
         },
         email: {
             type: DataTypes.STRING,
@@ -25,7 +17,7 @@ Users.init(
         },
         isstudent: {
             type: DataTypes.BOOLEAN,
-            allowNull: false,
+            allowNull: true,
         },
         createdat: {
             type: DataTypes.TIME,

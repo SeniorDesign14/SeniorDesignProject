@@ -1,7 +1,9 @@
 import { diningService } from '@/api/services/diningService';
+import { FontAwesome } from '@expo/vector-icons';
+import { format } from 'date-fns';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, Dimensions } from 'react-native';
 
 // Interface for dining hall data
 interface DiningHall {
@@ -18,14 +20,19 @@ interface DiningHall {
 }
 
 // Component for a single list item
-const DiningItem = ({ name, id, diningHall }: { name: string; id: string; diningHall: DiningHall }) => {
+const DiningItem = ({ name, id, diningHall, selectedDate }: { name: string; id: string; diningHall: DiningHall, selectedDate: Date }) => {
 
-  const status = getStatus(diningHall);
+  const status = getStatus(diningHall, selectedDate);
   
   const handlePress = () => {
     router.push({
       pathname: "../menu",
-      params: { name, id, mealPeriod: status !== "Closed" ? status[0] : "Breakfast" },
+      params: { 
+        name, 
+        id, 
+        mealPeriod: status !== "Closed" ? status[0] : "Breakfast",
+        selectedDate: format(selectedDate, 'yyyy-MM-dd')
+      },
     });
   };
 
@@ -44,6 +51,24 @@ const DiningItem = ({ name, id, diningHall }: { name: string; id: string; dining
 
 // Main screen component
 const DiningScreen = () => {
+
+  // State to store a specified date
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // Function for previous day arrow
+  const handlePrevDay = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() - 1);
+    setSelectedDate(newDate);
+  };
+
+  // Function for next day arrow
+  const handleNextDay = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() + 1);
+    setSelectedDate(newDate);
+  };
+
   // State to store dining hall data
   const [diningHalls, setDiningHalls] = useState<DiningHall[]>([]);
 
@@ -61,17 +86,61 @@ const DiningScreen = () => {
     fetchHalls();
   }, []);
 
+  // Handlers for the icons
+  const handleSearchPress = () => {
+    // navigate to foodQuery screen
+    router.push({
+      pathname: "../foodQuery",
+    });
+  };
+
+  const handleFavoritePress = () => {
+    // navigate to favorited screen
+    router.push({
+      pathname: "../favorited",
+    });
+  };
+
+  const { width } = Dimensions.get('window');
+  const iconSize = width < 500 ? 20 : 24;
 
   return (
     <SafeAreaView style={styles.container}>
+
+
       <View style={styles.header}>
-        <Text style={styles.headerText}>HuskyHotspot</Text>
-        <Text style={styles.dateText}>{getCurrentDate()}</Text>
+
+
+        <View style={styles.headerRow}>
+          <View style={styles.centerContainer}>
+            <TouchableOpacity onPress={handlePrevDay}>
+              <Text style={styles.arrow}>&lt;</Text>
+            </TouchableOpacity>
+            <Text style={styles.headerText}>HuskyHotspot</Text>
+            <TouchableOpacity onPress={handleNextDay}>
+              <Text style={styles.arrow}>&gt;</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.iconContainer}>
+            <TouchableOpacity onPress={handleSearchPress}>
+              <FontAwesome name="search" size={iconSize} color="#fff" style={styles.icon} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleFavoritePress}>
+              <FontAwesome name="star" size={iconSize} color="#fff" style={styles.icon} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+
+        <Text style={styles.dateText}>{getCurrentDate(selectedDate)}</Text>
       </View>
+
+
       <FlatList<DiningHall>
         data={diningHalls}
         keyExtractor={(item) => item.dininghallid.toString()}
-        renderItem={({ item }) => <DiningItem name={item.location} id={item.dininghallid.toString()} diningHall={item}/>}
+        renderItem={({ item }) => <DiningItem name={item.location} id={item.dininghallid.toString()} diningHall={item} selectedDate={selectedDate}/>}
       />
     </SafeAreaView>
   );
@@ -91,21 +160,21 @@ const parseTime = (timeStr: string) => {
 };
 
 // Function to get the current date
-const getCurrentDate = () => {
-  const today = new Date();
+const getCurrentDate = (date: Date) => {
+  // const today = new Date();
   const options: Intl.DateTimeFormatOptions = {
     weekday: 'long',
     month: 'short',
     day: 'numeric',
   };
-  return today.toLocaleDateString(undefined, options);
+  return date.toLocaleDateString(undefined, options);
 };
 
 // Function for getting the status of a dining hall (hours: open/closed)
-const getStatus = (hall: DiningHall) => {
-  const now = new Date();
-  const currentDay = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(now.getDay()); // Current day in text
-  const currentTime = now.getHours() + now.getMinutes() / 60; // Current time in decimal
+const getStatus = (hall: DiningHall, selectedDate: Date) => {
+  // const now = new Date();
+  const currentDay = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(selectedDate); // Current day in text
+  const currentTime = selectedDate.getHours() + selectedDate.getMinutes() / 60; // Current time in decimal
   
   // Look for current day and time in the hall's hours
   for (const hour of hall.hours) {
@@ -120,6 +189,8 @@ const getStatus = (hall: DiningHall) => {
   // If not found, then dining hall is closed
   return 'Closed';
 };
+
+
 
 // Styles
 const styles = StyleSheet.create({
@@ -169,7 +240,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
-  }
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  centerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+  },
+  arrow: {
+    color: '#fff',
+    fontSize: 24,
+    paddingHorizontal: 16,
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 'auto',
+  },
+  icon: {
+    marginLeft: Dimensions.get('window').width < 500 ? 10 : 16,
+  },
 });
 
 export default DiningScreen;

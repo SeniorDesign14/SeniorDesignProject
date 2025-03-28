@@ -1,6 +1,3 @@
-//Replace static data with API calls to fetch data from backend
-
-
 import React, { useState } from 'react';
 import {
   View,
@@ -13,86 +10,42 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import axios from 'axios';
 
-// Dining hall data for responses
-const diningData = {
-  hours: {
-    connecticut: {
-      weekday: {
-        breakfast: '7:00 AM - 10:45 AM',
-        lunch: '11:00 AM - 2:30 PM',
-        dinner: '4:00 PM - 7:15 PM',
-      },
-      weekend: {
-        brunch: '10:30 AM - 2:30 PM',
-        dinner: '4:00 PM - 7:15 PM',
-      },
-    },
-    mcmahon: {
-      weekday: {
-        breakfast: '7:00 AM - 10:45 AM',
-        lunch: '11:00 AM - 2:00 PM',
-        dinner: '3:30 PM - 7:15 PM',
-      },
-      weekend: {
-        brunch: '10:30 AM - 2:00 PM',
-        dinner: '3:30 PM - 7:15 PM',
-      },
-    },
-  },
-  menus: {
-    connecticut: {
-      breakfast: ['Bacon', 'Eggs', 'French Toast'],
-      lunch: ['Chicken Sandwich', 'Salad', 'Pasta'],
-      dinner: ['Pizza', 'Steak', 'Vegetables'],
-    },
-    mcmahon: {
-      breakfast: ['Omelette', 'Pancakes', 'Fruit'],
-      lunch: ['Burger', 'Soup', 'Wraps'],
-      dinner: ['Chicken', 'Rice', 'Fish'],
-    },
-  },
+// Define the message type
+type Message = {
+  text: string;
+  sender: 'user' | 'bot';
 };
 
-// Predefined responses for common questions
-const processUserInput = (input: string) => {
-  const lowerInput = input.toLowerCase();
-
-  // Check for dining hall hours
-  if (lowerInput.includes('hours') || lowerInput.includes('time')) {
-    if (lowerInput.includes('connecticut')) {
-      return 'Connecticut Dining Hall Hours:\n- Breakfast: 7:00 AM - 10:45 AM\n- Lunch: 11:00 AM - 2:30 PM\n- Dinner: 4:00 PM - 7:15 PM';
-    } else if (lowerInput.includes('mcmahon')) {
-      return 'McMahon Dining Hall Hours:\n- Breakfast: 7:00 AM - 10:45 AM\n- Lunch: 11:00 AM - 2:00 PM\n- Dinner: 3:30 PM - 7:15 PM';
-    }
-  }
-
-  // Check for menu items
-  if (lowerInput.includes('menu')) {
-    if (lowerInput.includes('connecticut') && lowerInput.includes('breakfast')) {
-      return `Connecticut Breakfast Menu: ${diningData.menus.connecticut.breakfast.join(', ')}`;
-    } else if (lowerInput.includes('mcmahon') && lowerInput.includes('lunch')) {
-      return `McMahon Lunch Menu: ${diningData.menus.mcmahon.lunch.join(', ')}`;
-    }
-  }
-
-  return "Sorry, I couldn't find that information. Please ask about specific dining hall hours or menus!";
-};
+// Define the response type
+interface ApiResponse {
+  response: string;
+}
 
 // Main Chat Screen Component
 const ChatScreen = () => {
-  const [messages, setMessages] = useState<{ text: string; sender: 'user' | 'bot' }[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
 
   // Handle sending a message
-  const handleSend = () => {
+  const handleSend = async () => {
     if (input.trim() === '') return;
 
-    const userMessage = { text: input, sender: 'user' };
-    const botResponse = { text: processUserInput(input), sender: 'bot' };
+    const userMessage: Message = { text: input, sender: 'user' };
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
 
-    setMessages((prevMessages) => [...prevMessages, userMessage, botResponse]);
-    setInput('');
+    try {
+      const response = await axios.post<ApiResponse>('http://127.0.0.1:5000/datachat', { question: input });
+      const botResponse: Message = { text: response.data.response, sender: 'bot' };
+      setMessages((prevMessages) => [...prevMessages, botResponse]);
+    } catch (error) {
+      console.error('Error sending message to API:', error);
+      const botResponse: Message = { text: 'Sorry, something went wrong. Please try again later.', sender: 'bot' };
+      setMessages((prevMessages) => [...prevMessages, botResponse]);
+    }
+
+    setInput(''); // Clear the text input field
   };
 
   return (
@@ -103,7 +56,9 @@ const ChatScreen = () => {
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
             <View style={[styles.message, item.sender === 'user' ? styles.userMessage : styles.botMessage]}>
-              <Text style={styles.messageText}>{item.text}</Text>
+              <Text style={[styles.messageText, item.sender === 'user' ? styles.userMessageText : styles.botMessageText]}>
+                {item.text}
+              </Text>
             </View>
           )}
         />
@@ -145,7 +100,12 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 16,
-    color: '#333',
+  },
+  userMessageText: {
+    color: '#fff', // White text for user messages
+  },
+  botMessageText: {
+    color: '#333', // Dark text for bot messages
   },
   inputContainer: {
     flexDirection: 'row',
