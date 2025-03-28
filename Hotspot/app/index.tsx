@@ -7,9 +7,10 @@ import { useRouter, Redirect } from 'expo-router';
 //     <Redirect href="/(tabs)/dining" />
 //   );
 // }
- // direct to login screen when bootup
+
+// change this to login if we ever want to do the login screen
 export default function Index() {
   return (
-    <Redirect href="/login" />
+    <Redirect href="/dining" />
   );
 }
