@@ -5,6 +5,7 @@ import usersRoutes from './routes/users.js';
 import favoriteRoutes from './routes/favorite.js';
 import menuRoutes from './routes/menu.js';
 import nutritionalRoutes from './routes/nutritional.js';
+import authRoutes from './routes/auth.js';
 import cors from 'cors';
 import Users from './models/users.js';
 import axios from 'axios';
@@ -13,6 +14,8 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(json());
 app.use(cors());
+
+app.use('/auth', authRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server Listening on http://localhost:${PORT}`)
