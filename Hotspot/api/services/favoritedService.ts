@@ -3,7 +3,7 @@ import { ENDPOINTS } from "../endpoints";
 
 interface Favorited {
     // Define the properties of the Favorited object here
-    userid: number,
+    netid: string,
     foodid: number,
     food: string,
     dininghallid: number
@@ -12,5 +12,5 @@ interface Favorited {
 export const favoritedService = {
     getFavorited: (userid: string) => apiClient.get(ENDPOINTS.FAVORITE + `/${userid}`),
     postFavorited: (favorited: Favorited) => apiClient.post(ENDPOINTS.FAVORITE, favorited),
-    // deleteFavorited: (favorited: Favorited) => apiClient.delete(ENDPOINTS.FAVORITED, favorited),
+    deleteFavorited: (netid: string, foodid: number) => apiClient.delete(ENDPOINTS.FAVORITE + `/${netid}/${foodid}`),
 };
