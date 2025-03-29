@@ -6,37 +6,6 @@ import { format } from 'date-fns';
 import { TabBar, TabView } from 'react-native-tab-view';
 import { FontAwesome } from '@expo/vector-icons';
 
-
-// Interface for dining hall data
-interface Schedule {
-  scheduleid: number,
-  scheduledate: string,
-  foodid: number,
-  food: string,
-  isbreakfast: boolean,
-  islunch: boolean,
-  isdinner: boolean,
-  allergens: string,
-  summary: null,
-  imagelink: null,
-  diningstationid: number,
-  dininghallid: number,
-  station: {
-    diningstationid: number,
-    dininghallid: number,
-    stationname: string
-  }
-}
-
-interface Food {
-  foodid: number,
-  food: string
-}
-
-// Identify date - now used inside method
-// const date = new Date();
-// // const formattedDate: string = format(date, 'yyyy-MM-dd');
-
 // converts datestring from "yyyy-MM-dd" to "Tuesday, Mar 13"
 const formatToTextDate = (datestring: string) => {
   const date = new Date(datestring + "T00:00:00");
