@@ -3,23 +3,8 @@ import { FontAwesome } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { format } from 'date-fns';
-import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, Dimensions } from 'react-native';
 
-// Interface for dining hall data
-interface DiningHall {
-  dininghallid: number;
-  hallname: string;
-  location: string;
-  hours: Array<{
-    dininghourid: number;
-    dininghallid: number;
-    dayofweek: string;
-    mealperiod: string;
-    hours: string;
-  }>;
-}
 
 // Component for a single list item
 const DiningItem = ({ name, id, diningHall, selectedDate }: { name: string; id: string; diningHall: DiningHall, selectedDate: Date }) => {
