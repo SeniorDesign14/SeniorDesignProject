@@ -13,7 +13,7 @@ const favorited = () => {
     useEffect(() => {
         const fetchFavorited = async () => {
             try {
-                const userid = "1";
+                const userid = "jas20060";
                 const response = await favoritedService.getFavorited(userid);
                 setFavorited(response.favoriteFoods);
                 console.log(response.favoriteFoods);
@@ -27,7 +27,7 @@ const favorited = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Favorited Foods For User 1</Text>
+            <Text style={styles.header}>Favorited Foods For User jas20060</Text>
             <FlatList
             data={favoritedFood}
             keyExtractor={(item, index) => index.toString()}
