@@ -9,10 +9,10 @@ import NutritionalInfo from "./nutritionalInfo.js";
 
 
 // Set up associations
-DiningHalls.associate({ DiningHours, DiningStations });
+DiningHalls.associate({ DiningHours, DiningStations, ScheduleItems });
 DiningHours.associate({ DiningHalls });
 DiningStations.associate({ DiningHalls, ScheduleItems });
-ScheduleItems.associate({ DiningStations });
+ScheduleItems.associate({ DiningStations, DiningHalls });
 
 
 export { DiningHalls, DiningHours, ScheduleItems, DiningStations, FavoriteFoods, Users, Menu, NutritionalInfo };

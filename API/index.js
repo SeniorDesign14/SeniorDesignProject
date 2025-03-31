@@ -7,7 +7,6 @@ import menuRoutes from './routes/menu.js';
 import nutritionalRoutes from './routes/nutritional.js';
 import cors from 'cors';
 import Users from './models/users.js';
-import axios from 'axios';
 const PORT = process.env.PORT || 3000;
 
 const app = express();
