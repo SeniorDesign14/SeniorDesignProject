@@ -1,1 +1,1 @@
-{"root":["./src/db.ts","./src/gptService.ts","./src/index.ts","./src/routes/chatbot.ts","./src/routes/menu.ts","./src/utils/queryExecutor.ts"],"version":"5.7.3"}
+{"root":["./src/db.ts","./src/gptService.ts","./src/index.ts","./src/models/diningHall.ts","./src/models/menuItem.ts","./src/routes/chatbot.ts","./src/routes/menu.ts","./src/utils/queryExecutor.ts","./src/utils/validators.ts"],"version":"5.7.3"}

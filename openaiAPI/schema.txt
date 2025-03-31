@@ -20,9 +20,9 @@ Table: favoriteFoods
 - createdAt (timestamp)
 
 Table: diningHalls
-- diningHallID (integer, primary key)
-- hallName (string)
-- location (string)
+- dininghalliD (integer, primary key)
+- hallname (string)
+- location (string, use to identify dining hall)
 
 Table: diningHours
 - diningHourID (integer, primary key)
@@ -37,9 +37,9 @@ Table: diningStations
 - diningHallID (integer, references diningHalls.diningHallID)
 
 Table: menu (Contains all menu items, never deleted)
-- foodID (integer, primary key)
+- foodid (integer, primary key)
 - food (string)
-- lastSeen (string, note: how often it's on the menu)
+- lastseen (string, note: how often it's on the menu)
 
 Table: schedule (Fetched data, used for displaying menus)
 - scheduleID (integer, primary key)
