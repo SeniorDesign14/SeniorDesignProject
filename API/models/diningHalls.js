@@ -36,6 +36,10 @@ DiningHalls.associate = (models) => {
     DiningHalls.hasMany(models.DiningStations, {
         foreignKey: 'dininghallid',
         as: 'stations',
+    }),
+    DiningHalls.hasMany(models.ScheduleItems, {
+        foreignKey: 'dininghallid',
+        as: 'scheduleitems',
     });
 }
 
