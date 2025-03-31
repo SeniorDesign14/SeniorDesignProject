@@ -4,5 +4,5 @@ export const ENDPOINTS = {
     FAVORITE: '/favorite',
     MENU: '/menu',
     NUTRITIONAL: '/nutritional',
-    AUTH: '/auth/user',
+    AUTHUSER: '/authuser',
 }

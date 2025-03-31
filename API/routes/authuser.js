@@ -2,7 +2,7 @@ import express from 'express';
 
 const router = express.Router();
 
-router.get('/user', (req, res) => {
+router.get('/', (req, res) => {
     if (req.userNetID) {
         res.status(200).send({netid: req.userNetID});
     } else {

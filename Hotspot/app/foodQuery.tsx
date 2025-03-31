@@ -2,6 +2,7 @@ import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity } from 'r
 import React, { useEffect, useState } from 'react';
 import { menuService } from '@/api/services/menuService';
 import { favoritedService } from '@/api/services/favoritedService';
+import { authuserService } from '@/api/services/authuserService';
 import { FontAwesome } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
@@ -9,6 +10,7 @@ const foodQuery = () => {
   const [food, setFood] = useState<FoodItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredFood, setFilteredFood] = useState<FoodItem[]>([]);
+  const [_netid, setNetid] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchFood = async () => {
@@ -17,15 +19,20 @@ const foodQuery = () => {
         const response = await menuService.getMenu();
         console.log('Food data fetched:', response.menu);
 
-        // fetch favorited foods
-        const favoritedResponse = await favoritedService.getFavorited('jas20060'); // replace with actual netid
-        const favoritedFoodIds = favoritedResponse.favoriteFoods.map((item: { foodid: number }) => item.foodid);
+        const user = await authuserService.getCurrentUser();
+        setNetid(user.netid);
 
-        // map through the menu and add isFavorited property
+        const favoritedResponse = await favoritedService.getFavorited(user.netid);
+        const favoritedFoodIds = favoritedResponse.favoriteFoods.map(
+          (item: { foodid: number }) => item.foodid
+        );
+
         const foodWithFavorites = response.menu.map((item: FoodItem) => ({
           ...item,
-          isFavorited: favoritedFoodIds.includes(item.foodid)
+          isFavorited: favoritedFoodIds.includes(item.foodid),
+          // netid: user.netid,
         }));
+
         setFood(foodWithFavorites);
         setFilteredFood(foodWithFavorites);
       } catch (error) {
@@ -48,6 +55,8 @@ const foodQuery = () => {
   }, [searchQuery, food]);
 
   const toggleFavorite = async (item: FoodItem) => {
+    if (!_netid) return;
+
     try {
       const updatedFood = food.map(foodItem =>
         foodItem.foodid === item.foodid
@@ -57,16 +66,15 @@ const foodQuery = () => {
       setFood(updatedFood);
       setFilteredFood(updatedFood);
 
-      // Update the favorite status in the database
       if (!item.isFavorited) {
         await favoritedService.postFavorited({
-          netid: 'jas20060', // replace with actual netid
+          netid: _netid,
           foodid: item.foodid,
           food: item.food,
-          dininghallid: 1
+          dininghallid: 1,
         });
       } else {
-        await favoritedService.deleteFavorited('jas20060', item.foodid); // replace with actual netid
+        await favoritedService.deleteFavorited(_netid, item.foodid);
       }
     } catch (error) {
       console.error(error);
@@ -86,14 +94,15 @@ const foodQuery = () => {
         data={filteredFood}
         keyExtractor={(item) => item.foodid.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.item} onPress={() => {
-            // navigate to nutrional page
-            router.push({
-              pathname: "../nutritional",
-              params: { foodid: item.foodid },
-            });
-
-          }}>
+          <TouchableOpacity
+            style={styles.item}
+            onPress={() =>
+              router.push({
+                pathname: "../nutritional",
+                params: { foodid: item.foodid },
+              })
+            }
+          >
             <Text style={styles.foodText}>{item.food}</Text>
             <TouchableOpacity onPress={() => toggleFavorite(item)}>
               <FontAwesome

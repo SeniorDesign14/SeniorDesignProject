@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { favoritedService } from '@/api/services/favoritedService';
-import { authService } from '@/api/services/authService';
+import { authuserService } from '@/api/services/authuserService';
 
 interface FavoritedItem {
     food: string,
@@ -15,7 +15,7 @@ const favorited = () => {
     useEffect(() => {
         const fetchFavorited = async () => {
             try {
-                const netid = await authService.getCurrentUser(); 
+                const netid = await authuserService.getCurrentUser(); 
                 setUserNetid(netid);
 
                 const response = await favoritedService.getFavorited(netid);
