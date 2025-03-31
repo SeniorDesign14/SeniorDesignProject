@@ -24,7 +24,34 @@ router.post('/', async (req, res) => {
     }
 });
 
-// TESTING: get all favorite foods from a user
+// remove favorite food
+router.delete('/:netid/:foodid', async (req, res) => {
+    try {
+        const { netid, foodid } = req.params;
+        const deletedFood = await FavoriteFoods.destroy({
+            where: {
+                netid,
+                foodid
+            }
+        });
+        if (deletedFood) {
+            res.status(200).send({
+                message: 'Favorite food deleted successfully.'
+            });
+        } else {
+            res.status(404).send({
+                message: 'Favorite food not found.'
+            });
+        }
+    } catch (error) {
+        console.error('Error deleting favorite food:', error);
+        res.status(500).send({
+            error: 'Failed to delete favorite food.'
+        });
+    }
+});
+
+// get all favorite foods from a user
 router.get('/:netid', async (req, res) => {
     try {
         const { netid } = req.params;
