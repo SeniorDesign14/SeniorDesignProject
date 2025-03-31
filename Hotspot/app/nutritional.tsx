@@ -3,39 +3,6 @@ import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
  
-interface NutritionalInfo {
-  foodid: number;
-  food: string;
-  servingspercontainer: number;
-  servingsize: string;
-  calories: number;
-  totalfat: number;
-  totalfatdv: number;
-  saturatedfat: number;
-  saturatedfatdv: number;
-  transfat: number;
-  cholesterol: number;
-  cholesteroldv: number;
-  sodium: number;
-  sodiumdv: number;
-  carbs: number;
-  carbsdv: number;
-  fiber: number;
-  fiberdv: number;
-  sugars: number;
-  addedsugars: number;
-  addedsugarsdv: number;
-  protein: number;
-  calcium: number;
-  calciumdv: number;
-  iron: number;
-  irondv: number;
-  vitamind: number;
-  vitaminddv: number;
-  potassium: number;
-  potassiumdv: number;
-}
- 
 const nutritional = () => {
   const { foodid } = useLocalSearchParams();
   const [nutritionalInfo, setNutritionalInfo] = useState<NutritionalInfo | null>(null);

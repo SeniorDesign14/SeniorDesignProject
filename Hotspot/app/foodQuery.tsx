@@ -5,12 +5,6 @@ import { favoritedService } from '@/api/services/favoritedService';
 import { FontAwesome } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
-interface FoodItem {
-  foodid: number;
-  food: string;
-  isFavorited: boolean;
-}
-
 const foodQuery = () => {
   const [food, setFood] = useState<FoodItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,10 +13,18 @@ const foodQuery = () => {
   useEffect(() => {
     const fetchFood = async () => {
       try {
+        console.log('Fetching food data...');
         const response = await menuService.getMenu();
+        console.log('Food data fetched:', response.menu);
+
+        // fetch favorited foods
+        const favoritedResponse = await favoritedService.getFavorited('jas20060'); // replace with actual netid
+        const favoritedFoodIds = favoritedResponse.favoriteFoods.map((item: { foodid: number }) => item.foodid);
+
+        // map through the menu and add isFavorited property
         const foodWithFavorites = response.menu.map((item: FoodItem) => ({
           ...item,
-          isFavorited: false, // Initialize all items as not favorited
+          isFavorited: favoritedFoodIds.includes(item.foodid)
         }));
         setFood(foodWithFavorites);
         setFilteredFood(foodWithFavorites);
@@ -57,9 +59,14 @@ const foodQuery = () => {
 
       // Update the favorite status in the database
       if (!item.isFavorited) {
-        // await favoritedService.postFavorited(item.foodid);
+        await favoritedService.postFavorited({
+          netid: 'jas20060', // replace with actual netid
+          foodid: item.foodid,
+          food: item.food,
+          dininghallid: 1
+        });
       } else {
-        // await favoritedService.removeFavorited(item.foodid);
+        await favoritedService.deleteFavorited('jas20060', item.foodid); // replace with actual netid
       }
     } catch (error) {
       console.error(error);
