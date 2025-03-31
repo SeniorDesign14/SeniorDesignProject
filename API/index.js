@@ -5,6 +5,7 @@ import usersRoutes from './routes/users.js';
 import favoriteRoutes from './routes/favorite.js';
 import menuRoutes from './routes/menu.js';
 import nutritionalRoutes from './routes/nutritional.js';
+import authuserRoutes from './routes/authuser.js';
 import cors from 'cors';
 import Users from './models/users.js';
 const PORT = process.env.PORT || 3000;
@@ -40,6 +41,8 @@ app.use(async (req, res, next) => {
     }
     next(); // passes control to next route handler, otherwise request would never reach other routes
 });
+
+app.use('/authuser', authuserRoutes);
 
 app.use('/dininghalls', dininghallsRoutes);
 

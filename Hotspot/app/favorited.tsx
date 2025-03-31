@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { favoritedService } from '@/api/services/favoritedService';
+import { authuserService } from '@/api/services/authuserService';
 
 interface FavoritedItem {
     food: string,
@@ -9,12 +10,15 @@ interface FavoritedItem {
 const favorited = () => {
     // fetch user's favorited food
     const [favoritedFood, setFavorited] = useState<FavoritedItem[]>([]);
+    const [userNetid, setUserNetid] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchFavorited = async () => {
             try {
-                const userid = "jas20060";
-                const response = await favoritedService.getFavorited(userid);
+                const netid = await authuserService.getCurrentUser(); 
+                setUserNetid(netid);
+
+                const response = await favoritedService.getFavorited(netid);
                 setFavorited(response.favoriteFoods);
                 console.log(response.favoriteFoods);
             } catch (error) {
@@ -27,7 +31,7 @@ const favorited = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Favorited Foods For User jas20060</Text>
+            <Text style={styles.header}>Favorited Foods For User {userNetid ?? 'Loading...'}</Text>
             <FlatList
             data={favoritedFood}
             keyExtractor={(item, index) => index.toString()}
