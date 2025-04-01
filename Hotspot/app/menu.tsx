@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { TabBar, TabView } from 'react-native-tab-view';
 import { FontAwesome } from '@expo/vector-icons';
 
+
 // converts datestring from "yyyy-MM-dd" to "Tuesday, Mar 13"
 const formatToTextDate = (datestring: string) => {
   const date = new Date(datestring + "T00:00:00");

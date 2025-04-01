@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, Dimensions } from 'react-native';
 
+
 // Component for a single list item
 const DiningItem = ({ name, id, diningHall, selectedDate }: { name: string; id: string; diningHall: DiningHall, selectedDate: Date }) => {
 
