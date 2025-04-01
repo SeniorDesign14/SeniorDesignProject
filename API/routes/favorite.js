@@ -1,5 +1,6 @@
 import express from 'express';
 import { FavoriteFoods, Users } from '../models/init.js';
+import sequelize from 'sequelize';
 
 const router = express.Router();
 
@@ -47,6 +48,29 @@ router.delete('/:netid/:foodid', async (req, res) => {
         console.error('Error deleting favorite food:', error);
         res.status(500).send({
             error: 'Failed to delete favorite food.'
+        });
+    }
+});
+
+// get the top 5 favorite foods (sorted by count and alphabetically)
+router.get('/top5', async (req, res) => {
+    try {
+        const favoriteFoods = await FavoriteFoods.findAll({
+            attributes: [
+                'food',
+                [sequelize.fn('COUNT', sequelize.col('food')), 'count'] // Count occurrences of each food
+            ],
+            group: ['food'], // Group by food
+            order: [[sequelize.literal('count'), 'DESC'], ['food', 'ASC']], // Order by count and alphabetically
+            limit: 5
+        });
+        res.status(200).send({
+            favoriteFoods
+        });
+    } catch (error) {
+        console.error('Error fetching top 5 favorite foods:', error);
+        res.status(500).send({
+            error: 'Failed to fetch top 5 favorite foods.'
         });
     }
 });
