@@ -66,7 +66,8 @@ declare interface Schedule {
         dininghallid: number,
         hallname: string,
         location: string,
-    }
+    },
+    time: string
 }
   
 declare interface Food {
