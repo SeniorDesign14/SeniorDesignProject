@@ -5,4 +5,5 @@ export const ENDPOINTS = {
     MENU: '/menu',
     NUTRITIONAL: '/nutritional',
     AUTHUSER: '/authuser',
+    GPT: '/gpt',
 }

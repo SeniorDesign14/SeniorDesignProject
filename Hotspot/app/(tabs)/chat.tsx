@@ -1,34 +1,16 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-  StyleSheet,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
-import axios from 'axios';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, } from 'react-native';
+import gptService from '@/api/services/gptService'; 
 
-// Define the message type
 type Message = {
   text: string;
   sender: 'user' | 'bot';
 };
 
-// Define the response type
-interface ApiResponse {
-  response: string;
-}
-
-// Main Chat Screen Component
 const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
 
-  // Handle sending a message
   const handleSend = async () => {
     if (input.trim() === '') return;
 
@@ -36,27 +18,45 @@ const ChatScreen = () => {
     setMessages((prevMessages) => [...prevMessages, userMessage]);
 
     try {
-      const response = await axios.post<ApiResponse>('http://127.0.0.1:5000/datachat', { question: input });
-      const botResponse: Message = { text: response.data.response, sender: 'bot' };
-      setMessages((prevMessages) => [...prevMessages, botResponse]);
+      const { response } = await gptService.sendQuestion(input);
+      const botMessage: Message = { text: response, sender: 'bot' };
+      setMessages((prevMessages) => [...prevMessages, botMessage]);
     } catch (error) {
-      console.error('Error sending message to API:', error);
-      const botResponse: Message = { text: 'Sorry, something went wrong. Please try again later.', sender: 'bot' };
-      setMessages((prevMessages) => [...prevMessages, botResponse]);
+      console.error('AI error:', error);
+      const errorMsg: Message = {
+        text: 'Oops! Something went wrong. Try again later.',
+        sender: 'bot',
+      };
+      setMessages((prevMessages) => [...prevMessages, errorMsg]);
     }
 
-    setInput(''); // Clear the text input field
+    setInput('');
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.container}
+      >
         <FlatList
           data={messages}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(_, index) => index.toString()}
           renderItem={({ item }) => (
-            <View style={[styles.message, item.sender === 'user' ? styles.userMessage : styles.botMessage]}>
-              <Text style={[styles.messageText, item.sender === 'user' ? styles.userMessageText : styles.botMessageText]}>
+            <View
+              style={[
+                styles.message,
+                item.sender === 'user' ? styles.userMessage : styles.botMessage,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.messageText,
+                  item.sender === 'user'
+                    ? styles.userMessageText
+                    : styles.botMessageText,
+                ]}
+              >
                 {item.text}
               </Text>
             </View>
@@ -78,12 +78,8 @@ const ChatScreen = () => {
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
+  container: { flex: 1, backgroundColor: '#fff' },
   message: {
     padding: 10,
     margin: 10,
@@ -98,15 +94,9 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: '#e0e0e0',
   },
-  messageText: {
-    fontSize: 16,
-  },
-  userMessageText: {
-    color: '#fff', // White text for user messages
-  },
-  botMessageText: {
-    color: '#333', // Dark text for bot messages
-  },
+  messageText: { fontSize: 16 },
+  userMessageText: { color: '#fff' },
+  botMessageText: { color: '#333' },
   inputContainer: {
     flexDirection: 'row',
     padding: 10,
