@@ -1,7 +1,6 @@
-import sequelize from "../db.js";
 import { Op } from "sequelize";
-import DiningHall from "../models/diningHall.js";
-import Menu from "../models/menuItem.js";
+import DiningHall from "../models/diningHalls.js";
+import Menu from "../models/menu.js";
 
 // Validate if a dining hall exists
 export async function isValidDiningHall(name) {
@@ -67,3 +66,5 @@ export async function getAllFoodItems() {
     return [];
   }
 }
+
+

@@ -3,10 +3,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 
-import {
-  getAllDiningHalls,
-  getAllFoodItems
-} from './utils/validators.js'; // adjust path to match your layout
+import { getAllDiningHalls, getAllFoodItems } from '../utils/validators.js'; // adjust path to match your layout
 
 dotenv.config();
 
