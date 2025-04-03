@@ -25,5 +25,11 @@ Menu.init(
 );
  
 // define associations
+Menu.associate = (models) => {
+    Menu.hasMany(models.FoodImages, {
+        foreignKey: 'foodid',
+        as: 'images',
+    });
+};
  
 export default Menu;
