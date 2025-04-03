@@ -67,12 +67,8 @@ declare interface Schedule {
         hallname: string,
         location: string,
     },
-    time: string
-}
-  
-declare interface Food {
-    foodid: number,
-    food: string
+    time: string,
+    isFavorited: boolean
 }
 
 declare interface FoodItem {
