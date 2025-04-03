@@ -1,188 +1,282 @@
-import React, { useState } from 'react';
-import {View, Text, SafeAreaView, StyleSheet, FlatList, TouchableOpacity, ScrollView,} from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { View, Text, SafeAreaView, StyleSheet, FlatList, ScrollView } from 'react-native';
+import { format, parseISO, set } from 'date-fns';
+import { favoritedService } from '@/api/services/favoritedService';
+import { scheduleService } from '@/api/services/scheduleService';
 
-// const Summary = () => {
-//   return (
-//     <SafeAreaView>
-//       <Text>Summary</Text>
-//     </SafeAreaView>
-//   )
-// }
+const sum = () => {
+  const [matches, setMatches] = useState<Schedule[]>([]);
+  const [top5, setTop5] = useState<{ food: string, count: number }[]>([]);
+  const [loading, setLoading] = useState(true);
 
-const Summary: React.FC = () => {
-  const [selectedWeek, setSelectedWeek] = useState('This Week');
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [popularMeals, setPopularMeals] = useState([
-    { id: '1', name: 'Pizza', votes: 120 },
-    { id: '2', name: 'Burger', votes: 110 },
-    { id: '3', name: 'Pasta', votes: 95 },
-  ]);
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const endDate = format(new Date(new Date().setDate(new Date().getDate() + 6)), 'yyyy-MM-dd');
 
-  const weeks = ['This Week', 'Last Week', 'Two Weeks Ago'];
+  // THIS IS ALL POST PROCESSING DATA (MAY END UP DOING THIS ON THE BACKEND)
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
 
-  const handleWeekChange = (week: string) => {
-    setSelectedWeek(week);
-    setShowDropdown(false);
+        // Fetch top5 favorited foods
+        const top5Response = await favoritedService.getTop5Favorited();
+        const top5Map = top5Response["favoriteFoods"];
+        // USING THIS FOR DISPLAYING DATA OF TOP 5 FAVORITED FOODS
+        setTop5(top5Map);
+        // console.log('Top 5 Foods:', top5Map);
 
-    if (week === 'This Week') {
-      setPopularMeals([
-        { id: '1', name: 'Pizza', votes: 120 },
-        { id: '2', name: 'Burger', votes: 110 },
-        { id: '3', name: 'Pasta', votes: 95 },
-      ]);
-    } else if (week === 'Last Week') {
-      setPopularMeals([
-        { id: '4', name: 'Salad', votes: 130 },
-        { id: '5', name: 'Tacos', votes: 100 },
-        { id: '6', name: 'Sushi', votes: 90 },
-      ]);
-    } else {
-      setPopularMeals([
-        { id: '7', name: 'Fried Rice', votes: 125 },
-        { id: '8', name: 'Chicken Wings', votes: 115 },
-        { id: '9', name: 'Pancakes', votes: 85 },
-      ]);
+        // Fetch favorited foods
+        const favoritedResponse = await favoritedService.getFavorited('jas20060'); // Replace with actual netid
+        const favoritedList = favoritedResponse.favoriteFoods.map((item: { foodid: number }) => item.foodid);
+
+        // Fetch schedule
+        const scheduleResponse = await scheduleService.getScheduleRange(today, endDate);
+        const schedule = scheduleResponse.schedule;
+
+        // Map schedule to include time (breakfast, lunch, dinner)
+        const scheduleWithTime = schedule.map((item: Schedule) => {
+          let time = '';
+  
+          if (item.isbreakfast) time = 'Breakfast';
+          if (item.islunch) time = 'Lunch';
+          if (item.isdinner) time = 'Dinner';
+        
+          return { ...item, time };
+        });
+
+        // Find matches of schedule to favorited foods
+        const matchedFoods = scheduleWithTime.filter((item: Schedule) =>
+          favoritedList.includes(item.foodid)
+        );
+
+        // Group foods by time (breakfast, lunch, dinner) from matchedFoods for those served at the same location on the same day (EX: if served on lunch and dinner then group to one entry of "Lunch / Dinner")
+        const groupedMatches = matchedFoods.reduce((acc: Schedule[], item: Schedule) => {
+          // Check if an entry for the same food, date, and location already exists
+          const existingIndex = acc.findIndex(
+            (t) =>
+              t.foodid === item.foodid &&
+              t.scheduledate === item.scheduledate &&
+              t.hall.location === item.hall.location
+          );
+        
+          if (existingIndex !== -1) {
+            // If it exists, append the time to the existing entry
+            const existingItem = acc[existingIndex];
+            if (!existingItem.time.includes(item.time)) {
+              existingItem.time = `${existingItem.time} / ${item.time}`;
+            }
+          } else {
+            // If it doesn't exist, add the item to the accumulator
+            acc.push({ ...item });
+          }
+        
+          return acc;
+        }, []);
+
+        setMatches(groupedMatches);
+        // console.log('Grouped Foods:', groupedMatches);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const groupMatchesByDay = (matches: Schedule[]) => {
+    // Generate all days starting from today for the next 6 days
+    const daysInRange = [];
+    let currentDate = new Date(new Date());
+  
+    for (let i = 0; i < 7; i++) {
+      const formattedDate = format(currentDate, 'EEEE, MMMM dd'); // Format as "Day, Month Date"
+      daysInRange.push(formattedDate);
+      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
     }
+  
+    // Prepopulate the grouped object with all days
+    const grouped = daysInRange.reduce((acc: { [key: string]: Schedule[] }, day) => {
+      acc[day] = []; // Initialize each day with an empty array
+      return acc;
+    }, {});
+  
+    // Group matches by day
+    matches.forEach((item: Schedule) => {
+      const day = format(parseISO(item.scheduledate), 'EEEE, MMMM dd'); // Get day of the week
+      if (grouped[day]) {
+        grouped[day].push(item);
+      }
+    });
+  
+    // Sort each day's matches by time
+    Object.keys(grouped).forEach((day) => {
+      grouped[day].sort((a, b) => {
+        const timeOrder = ['Breakfast', 'Lunch', 'Dinner'];
+        const getTimePriority = (time: string) => {
+          const times = time.split(' / ');
+          return Math.min(...times.map((t) => timeOrder.indexOf(t)));
+        };
+        return getTimePriority(a.time) - getTimePriority(b.time);
+      });
+    });
+  
+    return grouped;
   };
 
+  // USING THIS FOR DISPLAYING DATA OF WEEKLY SUMMARY
+  const groupedMatches = groupMatchesByDay(matches);
+  // console.log('Grouped Matches:', groupedMatches);
+
+  // END OF POST PROCESSING DATA
+
+  // USE top5 AND groupedMatches TO DISPLAY DATA
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Summary</Text>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      {loading ? (
+        // Show a loading indicator or message while loading
+        <Text style={styles.loadingText}>Loading...</Text>
+      ) : (
+        // Render the content only after loading is complete
+        <>
+          <Text style={styles.header}>Summary</Text>
 
-      {/* Dropdown Selector */}
-      <View style={styles.dropdownContainer}>
-        <TouchableOpacity
-          style={styles.dropdownButton}
-          onPress={() => setShowDropdown(!showDropdown)}
-        >
-          <Text style={styles.dropdownButtonText}>{selectedWeek}</Text>
-          <MaterialIcons
-            name={showDropdown ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
-            size={24}
-            color="#333"
-            style={styles.arrowIcon}
-          />
-        </TouchableOpacity>
-        {showDropdown && (
-          <View style={styles.dropdownList}>
-            {weeks
-              .filter((week) => week !== selectedWeek) 
-              .map((week) => (
-                <TouchableOpacity
-                  key={week}
-                  style={styles.dropdownItem}
-                  onPress={() => handleWeekChange(week)}
-                >
-                  <Text style={styles.dropdownItemText}>{week}</Text>
-                </TouchableOpacity>
-              ))}
-          </View>
-        )}
-      </View>
-
-      {/* Popular Meals Section */}
-      <View style={styles.mealsContainer}>
-        <Text style={styles.sectionTitle}>
-          Most Popular Meals for {selectedWeek}
-        </Text>
-        <FlatList
-          data={popularMeals}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.mealItem}>
-              <Text style={styles.mealName}>{item.name}</Text>
-              <Text style={styles.mealVotes}>{item.votes} votes</Text>
+          {/* Top 5 Favorited Foods */}
+          <Text style={styles.subHeader}>Top Favorited</Text>
+          <View style={styles.table}>
+            <View style={styles.tableHeader}>
+              <Text style={[styles.tableCell, styles.tableHeaderCell]}>Food</Text>
+              <Text style={[styles.tableCell, styles.tableHeaderCell]}>Count</Text>
             </View>
+            {top5.map((item, index) => (
+              <View key={index} style={styles.tableRow}>
+                <Text style={styles.tableCell}>{index === 0 ? '🔥 ' : ''}{item.food}</Text>
+                <Text style={styles.tableCell}>{item.count}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Weekly Matches */}
+          <Text style={styles.subHeader}>Your Weekly Summary</Text>
+          {Object.keys(groupedMatches).length > 0 ? (
+            Object.entries(groupedMatches).map(([day, items]) => (
+              <View key={day} style={styles.daySection}>
+                <Text style={styles.dayHeader}>{day}</Text>
+                <View style={styles.table}>
+                  {items.length > 0 ? (
+                    <>
+                      <View style={styles.tableHeader}>
+                        <Text style={[styles.tableCell, styles.tableHeaderCell]}>Food</Text>
+                        <Text style={[styles.tableCell, styles.tableHeaderCell]}>Time</Text>
+                        <Text style={[styles.tableCell, styles.tableHeaderCell]}>Location</Text>
+                      </View>
+                      {items.map((item, index) => (
+                        <View key={index} style={styles.tableRow}>
+                          <Text style={styles.tableCell}>{item.food}</Text>
+                          <Text style={styles.tableCell}>{item.time}</Text>
+                          <Text style={styles.tableCell}>{item.hall.location}</Text>
+                        </View>
+                      ))}
+                    </>
+                  ) : (
+                    // Message for days with no items
+                    <Text style={styles.noItemsText}>No favorites served on this day.</Text>
+                  )}
+                </View>
+              </View>
+            ))
+          ) : (
+            <Text>No favorited foods are being served in the next 7 days.</Text>
           )}
-        />
-      </View>
-    </SafeAreaView>
+        </>
+      )}
+    </ScrollView>
+  </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
-    padding: 10,
+    backgroundColor: '#001F54',
+  },
+  scrollContainer: {
+    padding: 16,
   },
   header: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '700',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
+    color: '#fff',
   },
-  dropdownContainer: {
-    marginBottom: 20,
-    position: 'relative',
+  subHeader: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 10,
+    marginTop: 20,
+    textAlign: 'center',
   },
-  dropdownButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
+  table: {
+    marginVertical: 10,
     backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-  },
-  dropdownButtonText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  arrowIcon: {
-    marginLeft: 10,
-  },
-  dropdownList: {
-    marginTop: 5,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    zIndex: 1,
-  },
-  dropdownItem: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  dropdownItemText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  mealsContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 15,
+    borderRadius: 10,
+    overflow: 'hidden',
     shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.08,
     shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
     elevation: 2,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  mealItem: {
+  tableHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 8,
+    backgroundColor: '#e0e0e0',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  tableRow: {
+    flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    paddingBottom: 5,
   },
-  mealName: {
-    fontSize: 16,
+  tableCell: {
+    flex: 1,
+    padding: 12,
+    textAlign: 'center',
+    fontSize: 15,
+    color: '#333',
   },
-  mealVotes: {
+  tableHeaderCell: {
+    fontWeight: 'bold',
+    color: '#001F54',
+  },
+  daySection: {
+    marginBottom: 24,
+  },
+  dayHeader: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
+    color: '#cfd8dc',
+  },
+  noItemsText: {
     fontSize: 16,
-    color: '#555',
+    color: '#ccc',
+    textAlign: 'center',
+    padding: 12,
+  },
+  loadingText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 40,
   },
 });
 
 
-export default Summary
+export default sum;
