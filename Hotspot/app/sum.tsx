@@ -3,7 +3,6 @@ import { View, Text, SafeAreaView, StyleSheet, FlatList, ScrollView } from 'reac
 import { format, parseISO, set } from 'date-fns';
 import { favoritedService } from '@/api/services/favoritedService';
 import { scheduleService } from '@/api/services/scheduleService';
-import { authuserService } from '@/api/services/authuserService';
 
 const sum = () => {
   const [matches, setMatches] = useState<Schedule[]>([]);
@@ -24,12 +23,10 @@ const sum = () => {
         const top5Map = top5Response["favoriteFoods"];
         // USING THIS FOR DISPLAYING DATA OF TOP 5 FAVORITED FOODS
         setTop5(top5Map);
-        // console.log('Top 5 Foods', top5Map);
-
+        // console.log('Top 5 Foods:', top5Map);
 
         // Fetch favorited foods
-        const currentUser = await authuserService.getCurrentUser();
-        const favoritedResponse = await favoritedService.getFavorited(currentUser);// Replace with actual netid
+        const favoritedResponse = await favoritedService.getFavorited('jas20060'); // Replace with actual netid
         const favoritedList = favoritedResponse.favoriteFoods.map((item: { foodid: number }) => item.foodid);
 
         // Fetch schedule
