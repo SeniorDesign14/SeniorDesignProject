@@ -1,5 +1,5 @@
-import { nutritionalService } from '@/api/services/nutritionalService';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { nutritionalService } from '../api/services/nutritionalService';
+import { useLocalSearchParams, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
 
 interface NutritionalInfo {
   foodid: number;
@@ -44,7 +45,6 @@ interface NutritionalInfo {
 
 const nutritional = () => {
   const { foodid } = useLocalSearchParams();
-  const router = useRouter();
   const [nutritionalInfo, setNutritionalInfo] = useState<NutritionalInfo | null>(null);
 
   useEffect(() => {
@@ -73,23 +73,21 @@ const nutritional = () => {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <Text style={styles.backButtonText}>←</Text>
-      </TouchableOpacity>
-
-      {/* Header */}
-      <Text style={styles.header}>{nutritionalInfo.food}</Text>
-
-      {/* Sub-header info */}
-      <View style={styles.subHeader}>
-        <Text style={styles.subText}>Serving Size: {nutritionalInfo.servingsize}</Text>
-        <Text style={styles.subText}>Servings per Container: {nutritionalInfo.servingspercontainer}</Text>
+    <ScrollView contentContainerStyle={styles.container} style={styles.screen}> 
+      {/* Header Section */}
+      <View style={styles.customHeader}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backIcon}>
+          <FontAwesome name="arrow-left" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>{nutritionalInfo.food}</Text>
       </View>
+
 
       {/* Nutrition Info */}
       <View style={styles.infoBox}>
+        <Text style={styles.label}>Serving Size: {nutritionalInfo.servingsize}</Text>
+        <Text style={styles.label}>Servings per Container: {nutritionalInfo.servingspercontainer}</Text>
+        <Text style={styles.label}>Allergens: <Text style={styles.value}>TODO</Text></Text>
         <Text style={styles.label}>Calories: <Text style={styles.value}>{nutritionalInfo.calories}</Text></Text>
         <Text style={styles.label}>Total Fat: <Text style={styles.value}>{nutritionalInfo.totalfat}g ({nutritionalInfo.totalfatdv}%)</Text></Text>
         <Text style={styles.label}>Saturated Fat: <Text style={styles.value}>{nutritionalInfo.saturatedfat}g ({nutritionalInfo.saturatedfatdv}%)</Text></Text>
@@ -107,10 +105,7 @@ const nutritional = () => {
         <Text style={styles.label}>Potassium: <Text style={styles.value}>{nutritionalInfo.potassium}mg ({nutritionalInfo.potassiumdv}%)</Text></Text>
       </View>
 
-      {/* Allergens Section (Placeholder) */}
-      <View style={styles.allergensBox}>
-        <Text style={styles.label}>Allergens: <Text style={styles.value}>Contains milk, soy</Text></Text>
-      </View>
+      
     </ScrollView>
   );
 };
@@ -126,27 +121,38 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#fff',
   },
+  screen: {
+    flex: 1,
+    backgroundColor: '#001F54',
+  },
+  
+  scrollContent: {
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: '#001F54',
+  },  
   container: {
     padding: 20,
     backgroundColor: '#001F54',
   },
-  backButton: {
-    marginBottom: 10,
+  customHeader: {
+    position: 'relative',
+    marginBottom: 20,
+    alignItems: 'center',
   },
-  backButtonText: {
-    fontSize: 16,
-    color: '#fff',
+  backIcon: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    padding: 4,
   },
-  header: {
-    fontSize: 26,
+  headerText: {
+    fontSize: 22,
     fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 16,
     color: '#fff',
+    textAlign: 'center',
   },
-  subHeader: {
-    marginBottom: 16,
-  },
+
   subText: {
     fontSize: 16,
     color: '#cdd4e0',
