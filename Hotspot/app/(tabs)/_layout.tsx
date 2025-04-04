@@ -15,6 +15,8 @@ const TabsLayout = () => {
           tabBarShowLabel: true,
           tabBarLabelPosition: 'below-icon',
           headerShown: false,
+          tabBarActiveTintColor: '#001F54', 
+          tabBarInactiveTintColor: '#888', 
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="cutlery" size={size} color={color} /> // Use FontAwesome icon
           ),
@@ -27,6 +29,8 @@ const TabsLayout = () => {
           tabBarShowLabel: true,
           tabBarLabelPosition: 'below-icon',
           headerShown: false,
+          tabBarActiveTintColor: '#001F54', 
+          tabBarInactiveTintColor: '#888', 
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="comments" size={size} color={color} /> // Use FontAwesome icon
           ),
@@ -39,6 +43,8 @@ const TabsLayout = () => {
           tabBarShowLabel: true,
           tabBarLabelPosition: 'below-icon',
           headerShown: false,
+          tabBarActiveTintColor: '#001F54', 
+          tabBarInactiveTintColor: '#888', 
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="list-alt" size={size} color={color} /> // Use FontAwesome icon
           ),
@@ -51,6 +57,8 @@ const TabsLayout = () => {
           tabBarShowLabel: true,
           tabBarLabelPosition: 'below-icon',
           headerShown: false,
+          tabBarActiveTintColor: '#001F54', 
+          tabBarInactiveTintColor: '#888', 
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="cog" size={size} color={color} /> // Use FontAwesome icon
           ),
