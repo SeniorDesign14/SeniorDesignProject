@@ -4,10 +4,11 @@ import { Modal, View, Text, Image, TouchableOpacity, StyleSheet } from 'react-na
 interface FoodImageProps {
   visible: boolean;
   imageUri: string | null;
+  foodName: string;
   onClose: () => void;
 }
 
-const FoodImageModal: React.FC<FoodImageProps> = ({ visible, imageUri, onClose }) => {
+const FoodImageModal: React.FC<FoodImageProps> = ({ visible, imageUri, foodName, onClose }) => {
   return (
     <Modal
       visible={visible}
@@ -17,11 +18,16 @@ const FoodImageModal: React.FC<FoodImageProps> = ({ visible, imageUri, onClose }
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
+          {foodName && <Text style={styles.foodNameText}>{foodName}</Text>}
           {imageUri ? (
+            <>
             <Image
               source={{ uri: imageUri }}
               style={styles.modalImage}
             />
+            <Text style={styles.captionText}>Note: Images are AI generated and may not accurately represent the actual food served </Text>
+            </>
+            
           ) : (
             <Text style={styles.noImageText}>No image available for this item.</Text>
           )}
@@ -54,7 +60,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 10,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   closeButton: {
     backgroundColor: '#001F54',
@@ -72,6 +78,21 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'center',
     marginBottom: 20,
+  },
+  captionText: {
+    fontSize: 14,
+    color: '#555',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginBottom: 10,
+    maxWidth: 300,
+  },
+  foodNameText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#001F54',
+    textAlign: 'center',
+    marginBottom: 10,
   },
 });
 
