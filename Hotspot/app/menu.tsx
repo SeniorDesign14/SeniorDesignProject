@@ -5,6 +5,7 @@ import { scheduleService } from '@/api/services/scheduleService';
 import { format } from 'date-fns';
 import { TabBar, TabView } from 'react-native-tab-view';
 import { FontAwesome } from '@expo/vector-icons';
+import { favoritedService } from '@/api/services/favoritedService';
 
 
 // converts datestring from "yyyy-MM-dd" to "Tuesday, Mar 13"
@@ -46,8 +47,19 @@ const menu = () => {
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
+        // get the schedule
         const response = await scheduleService.getSchedule(id, formattedDate);
-        setSchedule(response.schedule);
+
+        // fetch favorited foods
+        const favoritedResponse = await favoritedService.getFavorited('jas20060'); // replace with actual netid
+        const favoritedFoodIds = favoritedResponse.favoriteFoods.map((item: { foodid: number }) => item.foodid);
+
+        // map through the schedule and add isFavorited property
+        const scheduleWithFavorites = response.schedule.map((item: Schedule) => ({
+          ...item,
+          isFavorited: favoritedFoodIds.includes(item.foodid)
+        }));
+        setSchedule(scheduleWithFavorites);
       } catch (error) {
         console.error(error);
       }
@@ -58,27 +70,42 @@ const menu = () => {
 
   // Get meals based on current mealPeriod (breakfast, lunch, dinner) and sort into dictionary by dining station name
   const getMeals = (mealP: string) => {
-    let filterMeals: { [key: string]: Food[] } = {};
+    let filterMeals: { [key: string]: FoodItem[] } = {};
     const meals = schedule.filter(item => item[`is${mealP.toLowerCase()}` as keyof Schedule]);
     meals.forEach(item => {
       if (filterMeals[item.station.stationname]) {
-        filterMeals[item.station.stationname].push({ foodid: item.foodid, food: item.food });
+        filterMeals[item.station.stationname].push({ foodid: item.foodid, food: item.food, isFavorited: item.isFavorited });
       } else {
-        filterMeals[item.station.stationname] = [{ foodid: item.foodid, food: item.food }];
+        filterMeals[item.station.stationname] = [{ foodid: item.foodid, food: item.food, isFavorited: item.isFavorited }];
       }
     });
     return filterMeals;
   };
 
-  // Local state to track toggled icons
-  const [toggledStates, setToggledStates] = useState<{ [key: string]: boolean }>({});
-
-  const toggleIcon = (food: string) => {
-    setToggledStates((prevState) => ({
-      ...prevState,
-      [food]: !prevState[food], // Toggle the state for the specific food item
-    }));
-  };
+  const toggleFavorite = async (item: FoodItem) => {
+      try {
+        const updatedFood = schedule.map(scheduleItem =>
+          scheduleItem.foodid === item.foodid
+            ? { ...scheduleItem, isFavorited: !scheduleItem.isFavorited }
+            : scheduleItem
+        );
+        setSchedule(updatedFood);
+  
+        // Update the favorite status in the database
+        if (!item.isFavorited) {
+          await favoritedService.postFavorited({
+            netid: 'jas20060', // replace with actual netid
+            foodid: item.foodid,
+            food: item.food,
+            dininghallid: 1
+          });
+        } else {
+          await favoritedService.deleteFavorited('jas20060', item.foodid); // replace with actual netid
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
   const renderScene = ({ route }: { route: { key: string } }) => {
     const mealP = route.key;
@@ -94,7 +121,7 @@ const menu = () => {
             <FlatList
               data={foods}
               keyExtractor={(item, idx) => `${station}-${idx}`}
-              renderItem={({ item }: { item: Food }) => (
+              renderItem={({ item }: { item: FoodItem }) => (
                 <TouchableOpacity style={styles.menuItem} onPress={ () => {
                   router.push({
                     pathname: "../nutritional",
@@ -102,11 +129,11 @@ const menu = () => {
                   }); // Add navigation to nutritional page
                 }}>
                   <Text style={styles.foodText}>{item.food}</Text>
-                    <TouchableOpacity onPress={() => toggleIcon(item.food)} style={styles.icon}>
+                    <TouchableOpacity onPress={() => toggleFavorite(item)} style={styles.icon}>
                       <FontAwesome
-                        name={toggledStates[item.food] ? 'star' : 'star-o'}
+                        name={item.isFavorited ? 'star' : 'star-o'}
                         size={24}
-                        color={toggledStates[item.food] ? 'gold' : 'gray'}
+                        color={item.isFavorited ? 'gold' : 'gray'}
                       />
                     </TouchableOpacity>
                 </TouchableOpacity>

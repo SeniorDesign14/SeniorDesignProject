@@ -25,7 +25,7 @@ const Settings: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Profile</Text>
           <Text style={styles.sectionText}>Edit your profile information</Text>
-          <Button title="Edit Profile" onPress={() => {}} />
+          <Button title="Edit Profile" onPress={() => {}} color="#001F54"/>
         </View>
 
         {/* Notifications Section */}
@@ -61,8 +61,8 @@ const Settings: React.FC = () => {
         {/* General Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>General</Text>
-          <Button title="FAQs" onPress={() => {}} />
-          <Button title="Send Feedback" onPress={() => {}} />
+          <Button title="FAQs" onPress={() => {}} color="#001F54" />
+          <Button title="Send Feedback" onPress={() => {}} color="#001F54" />
         </View>
 
         {/* Logout Section */}
