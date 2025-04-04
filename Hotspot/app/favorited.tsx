@@ -11,6 +11,7 @@ import { TouchableOpacity } from 'react-native';
 
 interface FavoritedItem {
   food: string;
+  foodid: number;
 }
 
 const Favorited = () => {
@@ -73,9 +74,27 @@ const Favorited = () => {
         }
         renderItem={({ item }) => (
           <View style={styles.item}>
-            <Text style={styles.foodText}>{item.food}</Text>
+            <View style={styles.row}>
+              <Text style={styles.foodText}>{item.food}</Text>
+              <TouchableOpacity
+                onPress={async () => {
+                  if (userNetid) {
+                    try {
+                      await favoritedService.deleteFavorited(userNetid, item.foodid);
+                      setFavorited(prev => prev.filter(f => f.foodid !== item.foodid));
+                    } catch (error) {
+                      console.error(error);
+                    }
+                  }
+                }}
+              >
+                <FontAwesome name="star" size={24} color="gold" />
+              </TouchableOpacity>
+            </View>
           </View>
         )}
+        
+        
       />
     </SafeAreaView>
   );
@@ -97,6 +116,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: 'center',
   },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },  
   backIcon: {
     position: 'absolute',
     left: 16,
