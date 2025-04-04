@@ -63,7 +63,11 @@ ScheduleItems.associate = (models) => {
     ScheduleItems.belongsTo(models.DiningStations, {
         foreignKey: 'diningstationid',
         as: 'station'
-    });
+    }),
+    ScheduleItems.belongsTo(models.DiningHalls, {
+        foreignKey: 'dininghallid',
+        as: 'hall'
+    })
 };
 
 export default ScheduleItems;
