@@ -9,35 +9,35 @@ type Message = {
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
+
   const [input, setInput] = useState('');
 
   const handleSend = async () => {
   const handleSend = async () => {
     if (input.trim() === '') return;
 
-    const userMessage: Message = { text: input, sender: 'user' };
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    // const userMessage: Message = { text: input, sender: 'user' };
+    // setMessages((prevMessages) => [...prevMessages, userMessage]);
 
-    try {
-      const { response } = await gptService.sendQuestion(input);
-      const botMessage: Message = { text: response, sender: 'bot' };
-      setMessages((prevMessages) => [...prevMessages, botMessage]);
-    } catch (error) {
-      console.error('AI error:', error);
-      const errorMsg: Message = {
-        text: 'Oops! Something went wrong. Try again later.',
-        sender: 'bot',
-      };
-      setMessages((prevMessages) => [...prevMessages, errorMsg]);
-    }
+    // try {
+    //   const { response } = await gptService.sendQuestion(input);
+    //   const botMessage: Message = { text: response, sender: 'bot' };
+    //   setMessages((prevMessages) => [...prevMessages, botMessage]);
+    // } catch (error) {
+    //   console.error('AI error:', error);
+    //   const errorMsg: Message = {
+    //     text: 'Oops! Something went wrong. Try again later.',
+    //     sender: 'bot',
+    //   };
+    //   setMessages((prevMessages) => [...prevMessages, errorMsg]);
+    // }
 
     const userMessage: Message = { text: input, sender: 'user' };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setInput('');
 
     try {
-      const response = await sendChatbotPrompt(input);
+      const response = await gptService.sendQuestion(input);
 
       const resultText = response.result
         ? JSON.stringify(response.result, null, 2)
@@ -145,5 +145,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
+}
 export default ChatScreen;

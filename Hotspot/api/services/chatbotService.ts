@@ -1,12 +1,14 @@
 import axios from 'axios';
 
-// you have to use vm IP address.
+// Replace with your actual VM IP address
+const BASE_URL = 'http://137.99.199.114:8080';
+
 export const sendChatbotPrompt = async (prompt: string) => {
   try {
-    const response = await axios.post('http://137.99.199.114:5050/api/chat', {
+    const response = await axios.post(`${BASE_URL}/api/chat`, {
       userPrompt: prompt,
     });
-    return response.data; 
+    return response.data;
   } catch (error) {
     console.error("Chatbot API error:", error);
     return { success: false, message: "Failed to contact chatbot." };

@@ -21,34 +21,34 @@ const sequelize_1 = require("sequelize");
 const diningHall_1 = __importDefault(require("../models/diningHall"));
 const menuItem_1 = __importDefault(require("../models/menuItem"));
 // Validate if a dining hall exists
-function isValidDiningHall(diningHallName) {
+function isValidDiningHall(name) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const result = yield diningHall_1.default.findOne({
                 where: {
-                    hallName: {
-                        [sequelize_1.Op.iLike]: diningHallName,
+                    location: {
+                        [sequelize_1.Op.iLike]: `%${name.trim()}%`, // <- must match the actual column name
                     },
                 },
             });
             return !!result;
         }
-        catch (error) {
-            console.error("Error validating dining hall:", error);
+        catch (err) {
+            console.error("Validation error:", err);
             return false;
         }
     });
 }
 // Validate if a food item exists
-function isValidFoodItem(foodName) {
+function isValidFoodItem(input) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const result = yield menuItem_1.default.findOne({
                 where: {
                     food: {
-                        [sequelize_1.Op.iLike]: foodName,
-                    },
-                },
+                        [sequelize_1.Op.iLike]: `%${input.trim()}%` // partial + case-insensitive match
+                    }
+                }
             });
             return !!result;
         }
@@ -69,13 +69,25 @@ const isValidDate = (dateStr) => {
 exports.isValidDate = isValidDate;
 function getAllDiningHalls() {
     return __awaiter(this, void 0, void 0, function* () {
-        const halls = yield diningHall_1.default.findAll({ attributes: ['hallname'] });
-        return halls.map(h => h.hallname.toLowerCase());
+        try {
+            const halls = yield diningHall_1.default.findAll({ attributes: ["hallname"] });
+            return halls.map((h) => h.getDataValue("hallname").toLowerCase());
+        }
+        catch (error) {
+            console.error("Error fetching dining halls:", error);
+            return [];
+        }
     });
 }
 function getAllFoodItems() {
     return __awaiter(this, void 0, void 0, function* () {
-        const items = yield menuItem_1.default.findAll({ attributes: ['food'] });
-        return items.map(i => i.food.toLowerCase());
+        try {
+            const items = yield menuItem_1.default.findAll({ attributes: ["food"] });
+            return items.map((i) => i.getDataValue("food").toLowerCase());
+        }
+        catch (error) {
+            console.error("Error fetching food items:", error);
+            return [];
+        }
     });
 }

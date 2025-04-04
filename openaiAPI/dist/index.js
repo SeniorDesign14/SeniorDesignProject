@@ -20,7 +20,8 @@ const chatbot_1 = __importDefault(require("./routes/chatbot"));
 require("./db");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const PORT = process.env.PORT || 5050;
+// const PORT = process.env.PORT ? parseInt(process.env.PORT) : 8080;
+const PORT = 8080;
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.get("/", (req, res) => {
@@ -37,6 +38,6 @@ app._router.stack.forEach((r) => {
         console.log(r.route.path);
     }
 });
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`API running on http://localhost:${PORT}`);
 });

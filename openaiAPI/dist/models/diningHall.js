@@ -17,6 +17,10 @@ DiningHall.init({
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },
+    location: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: false,
+    },
 }, {
     sequelize: db_1.default,
     modelName: "DiningHall",

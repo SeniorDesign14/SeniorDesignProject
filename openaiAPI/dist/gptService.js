@@ -18,44 +18,43 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 dotenv_1.default.config();
-// Initialize OpenAI
 const openai = new openai_1.default({
     apiKey: process.env.OPENAI_API_KEY,
 });
-const schemaPath = path_1.default.join(__dirname, "../schema.txt");
-const schemaDescription = fs_1.default.readFileSync(schemaPath, "utf-8");
-// AI function to generate SQL
-function askGPT(prompt) {
+// Read schema.txt once when this file is loaded
+const schemaPath = path_1.default.join(__dirname, "..", "schema.txt");
+let schemaText = "";
+try {
+    schemaText = fs_1.default.readFileSync(schemaPath, "utf-8");
+}
+catch (err) {
+    console.error("Failed to read schema.txt:", err);
+}
+function askGPT(userPrompt) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c;
-        const systemPrompt = `
-You are an AI SQL generator working with a PostgreSQL database. 
-Your job is to ONLY generate safe SELECT SQL queries based on the user's question and the following database schema. 
-Never generate INSERT, UPDATE, DELETE, DROP, or ALTER queries. 
-Use PostgreSQL syntax (e.g. CURRENT_DATE instead of CURDATE).
-NEVER use MySQL functions like CURDATE(), NOW(), etc.
-Note: schedule.scheduleDate is stored as a **string (YYYY-MM-DD)**, not a date type.
-Use TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD') for comparisons.
-Here is the schema:
-${schemaDescription}
+        var _a;
+        const prompt = `
+You are an intelligent SQL generator. Based on the schema provided, convert the user's question into a correct and secure SQL query for PostgreSQL.
+
+Schema:
+${schemaText}
+
+Rules:
+- Always use lowercase table and column names.
+- For dining hall filtering, use the 'location' column from the 'dininghalls' table (NOT hallname).
+- For food items, use the 'food' column from the 'menu' table.
+- Ensure the SQL is valid and uses proper JOINs based on foreign keys.
+
+User question: ${userPrompt}
+
+SQL:
 `;
-        try {
-            const response = yield openai.chat.completions.create({
-                model: "gpt-4",
-                messages: [
-                    { role: "system", content: systemPrompt },
-                    { role: "user", content: prompt },
-                ],
-                max_tokens: 300,
-            });
-            const aiResponse = (_c = (_b = (_a = response.choices[0]) === null || _a === void 0 ? void 0 : _a.message) === null || _b === void 0 ? void 0 : _b.content) === null || _c === void 0 ? void 0 : _c.trim();
-            if (!aiResponse)
-                throw new Error("No response from AI.");
-            return aiResponse;
-        }
-        catch (error) {
-            console.error("GPT API Error:", error);
-            throw new Error("Failed to generate SQL.");
-        }
+        const response = yield openai.chat.completions.create({
+            model: "gpt-4",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0,
+        });
+        const sql = (_a = response.choices[0].message.content) === null || _a === void 0 ? void 0 : _a.trim();
+        return sql || "";
     });
 }

@@ -5,93 +5,93 @@ You are an assistant that generates SQL queries based on this database schema. O
 Tables and their columns:
 
 Table: users
-- userID (integer, primary key)
-- ssoUserID (string, unique) — unique identifier from college SSO
+- userid (integer, primary key)
+- ssouserid (string, unique)
 - username (string)
 - email (string)
-- isStudent (boolean)
-- createdAt (timestamp)
-- updatedAt (timestamp)
+- isstudent (boolean)
+- createdat (timestamp)
+- updatedat (timestamp)
 
-Table: favoriteFoods
-- userID (integer, references users.userID)
-- foodID (integer, references menu.foodID)
+Table: favoritefoods
+- userid (integer, references users.userid)
+- foodid (integer, references menu.foodid)
 - food (string)
-- createdAt (timestamp)
+- createdat (timestamp)
 
-Table: diningHalls
-- dininghalliD (integer, primary key)
+Table: dininghalls
+- dininghallid (integer, primary key)
 - hallname (string)
-- location (string, use to identify dining hall)
+- location (string) — always use this to identify dining halls in queries
 
-Table: diningHours
-- diningHourID (integer, primary key)
-- diningHallID (integer, references diningHalls.diningHallID)
-- dayOfWeek (string)
-- mealPeriod (string)
+Table: dininghours
+- dininghourid (integer, primary key)
+- dininghallid (integer, references dininghalls.dininghallid)
+- dayofweek (string)
+- mealperiod (string)
 - hours (string)
 
-Table: diningStations
-- diningStationID (integer, primary key)
-- stationName (string)
-- diningHallID (integer, references diningHalls.diningHallID)
+Table: diningstations
+- diningstationid (integer, primary key)
+- stationname (string)
+- dininghallid (integer, references dininghalls.dininghallid)
 
-Table: menu (Contains all menu items, never deleted)
+Table: menu
 - foodid (integer, primary key)
 - food (string)
-- lastseen (string, note: how often it's on the menu)
+- lastseen (string)
 
-Table: schedule (Fetched data, used for displaying menus)
-- scheduleID (integer, primary key)
-- scheduleDate (string) — e.g., '2024-11-11' for Monday
-- foodID (integer, references menu.foodID)
+Table: schedule
+- scheduleid (integer, primary key)
+- scheduledate (string) — format: 'YYYY-MM-DD'
+- foodid (integer, references menu.foodid)
 - food (string)
-- isBreakfast (boolean)
-- isLunch (boolean)
-- isDinner (boolean)
+- isbreakfast (boolean)
+- islunch (boolean)
+- isdinner (boolean)
 - allergens (string)
 - summary (string)
-- imageLink (string)
-- diningStationID (integer, references diningStations.diningStationID)
-- diningHallID (integer, references diningHalls.diningHallID)
+- imagelink (string)
+- diningstationid (integer, references diningstations.diningstationid)
+- dininghallid (integer, references dininghalls.dininghallid)
 
-Table: nutritionalInfo
-- foodID (integer, primary key, references menu.foodID)
+Table: nutritionalinfo
+- foodid (integer, primary key, references menu.foodid)
 - food (string)
-- servingsPerContainer (integer)
-- servingSize (string)
+- servingspercontainer (integer)
+- servingsize (string)
 - calories (integer)
-- totalFat (float)
-- totalFatDV (integer)
-- saturatedFat (float)
-- saturatedFatDV (integer)
-- transFat (float)
+- totalfat (float)
+- totalfatdv (integer)
+- saturatedfat (float)
+- saturatedfatdv (integer)
+- transfat (float)
 - cholesterol (float)
-- cholesterolDV (integer)
+- cholesteroldv (integer)
 - sodium (float)
-- sodiumDV (integer)
+- sodiumdv (integer)
 - carbs (float)
-- carbsDV (integer)
+- carbsdv (integer)
 - fiber (float)
-- fiberDV (integer)
+- fiberdv (integer)
 - sugars (float)
-- addedSugars (float)
-- addedSugarsDV (integer)
+- addedsugars (float)
+- addedsugarsdv (integer)
 - protein (float)
 - calcium (float)
-- calciumDV (integer)
+- calciumdv (integer)
 - iron (float)
-- ironDV (integer)
-- vitaminD (float)
-- vitaminDDV (integer)
+- irondv (integer)
+- vitamind (float)
+- vitaminddv (integer)
 - potassium (float)
-- potassiumDV (integer)
+- potassiumdv (integer)
 
 ---
 
 Instructions:
-- Only return SQL query.
+- Only return a plain SQL query.
 - Do not explain or describe anything.
-- Use correct column names and relationships.
-- If asked "What meals are available today in McMahon dining hall?", return a SQL query using 'schedule', 'menu', and 'diningHalls' tables.
-- Follow the examples provided earlier for query format.
+- Use the correct column names (especially: use `location` to identify dining halls).
+- For date comparisons, use TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD').
+- Use ILIKE for case-insensitive text matching.

@@ -6,45 +6,44 @@ import path from 'path';
 
 dotenv.config();
 
-// Initialize OpenAI
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, 
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
-const schemaPath = path.join(__dirname, "../schema.txt");
-const schemaDescription = fs.readFileSync(schemaPath, "utf-8");
+// Read schema.txt once when this file is loaded
+const schemaPath = path.join(__dirname, "..", "schema.txt");
+let schemaText = "";
 
-// AI function to generate SQL
-export async function askGPT(prompt: string): Promise<string> {
-  const systemPrompt = `
-You are an AI SQL generator working with a PostgreSQL database. 
-Your job is to ONLY generate safe SELECT SQL queries based on the user's question and the following database schema. 
-Never generate INSERT, UPDATE, DELETE, DROP, or ALTER queries. 
-Use PostgreSQL syntax (e.g. CURRENT_DATE instead of CURDATE).
-NEVER use MySQL functions like CURDATE(), NOW(), etc.
-Note: schedule.scheduleDate is stored as a **string (YYYY-MM-DD)**, not a date type.
-Use TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD') for comparisons.
-Here is the schema:
-${schemaDescription}
+try {
+  schemaText = fs.readFileSync(schemaPath, "utf-8");
+} catch (err) {
+  console.error("Failed to read schema.txt:", err);
+}
+
+export async function askGPT(userPrompt: string): Promise<string> {
+  const prompt = `
+You are an intelligent SQL generator. Based on the schema provided, convert the user's question into a correct and secure SQL query for PostgreSQL.
+
+Schema:
+${schemaText}
+
+Rules:
+- Always use lowercase table and column names.
+- For dining hall filtering, use the 'location' column from the 'dininghalls' table (NOT hallname).
+- For food items, use the 'food' column from the 'menu' table.
+- Ensure the SQL is valid and uses proper JOINs based on foreign keys.
+
+User question: ${userPrompt}
+
+SQL:
 `;
 
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: prompt },
-      ],
-      max_tokens: 300,
-    });
+  const response = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0,
+  });
 
-    const aiResponse = response.choices[0]?.message?.content?.trim();
-
-    if (!aiResponse) throw new Error("No response from AI.");
-
-    return aiResponse;
-  } catch (error) {
-    console.error("GPT API Error:", error);
-    throw new Error("Failed to generate SQL.");
-  }
+  const sql = response.choices[0].message.content?.trim();
+  return sql || "";
 }
