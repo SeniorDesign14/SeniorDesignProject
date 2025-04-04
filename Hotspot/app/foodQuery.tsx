@@ -4,6 +4,7 @@ import { menuService } from '@/api/services/menuService';
 import { favoritedService } from '@/api/services/favoritedService';
 import { FontAwesome } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import FoodImageModal from '@/components/FoodModal';
 
 const foodQuery = () => {
   const [food, setFood] = useState<FoodItem[]>([]);
@@ -73,6 +74,28 @@ const foodQuery = () => {
     }
   };
 
+  // State for modal visibility and selected image
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const handleFoodImagePress = (foodId: number) => {
+    menuService
+      .getFoodImage(foodId)
+      .then((response) => {
+        if (response.image) {
+          setSelectedImage(response.image); // Set the selected image
+        } else {
+          setSelectedImage(null); // No image available
+        }
+        setModalVisible(true); // Open the modal
+      })
+      .catch((error) => {
+        console.error('Error fetching food image:', error);
+        setSelectedImage(null); // Handle error by setting no image
+        setModalVisible(true); // Open the modal even if there's no image
+      });
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Food Query</Text>
@@ -95,15 +118,29 @@ const foodQuery = () => {
 
           }}>
             <Text style={styles.foodText}>{item.food}</Text>
-            <TouchableOpacity onPress={() => toggleFavorite(item)}>
-              <FontAwesome
-                name={item.isFavorited ? 'star' : 'star-o'}
-                size={24}
-                color={item.isFavorited ? 'gold' : 'gray'}
-              />
-            </TouchableOpacity>
+              <View style={styles.iconContainer}>
+                <TouchableOpacity
+                  onPress={() => handleFoodImagePress(item.foodid)}
+                  style={styles.imageButton}
+                >
+                  <FontAwesome name="image" size={24} color="gray" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => toggleFavorite(item)} style={styles.icon}>
+                  <FontAwesome
+                    name={item.isFavorited ? 'star' : 'star-o'}
+                    size={24}
+                    color={item.isFavorited ? 'gold' : 'gray'}
+                  />
+                </TouchableOpacity>
+                </View>
           </TouchableOpacity>
         )}
+      />
+      
+      <FoodImageModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        imageUri={selectedImage}
       />
     </View>
   );
@@ -139,6 +176,16 @@ const styles = StyleSheet.create({
   foodText: {
     fontSize: 18,
     color: '#333',
+  },
+  icon: {
+    marginLeft: 10,
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  imageButton: {
+    marginRight: 10,
   },
 });
 
