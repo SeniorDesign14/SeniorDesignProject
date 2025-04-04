@@ -1,8 +1,16 @@
-import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { menuService } from '@/api/services/menuService';
-import { favoritedService } from '@/api/services/favoritedService';
-import { authuserService } from '@/api/services/authuserService';
+import { menuService } from '../api/services/menuService';
+import { favoritedService } from '../api/services/favoritedService';
+import { authuserService } from '../api/services/authuserService';
 import { FontAwesome } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
@@ -15,10 +23,7 @@ const foodQuery = () => {
   useEffect(() => {
     const fetchFood = async () => {
       try {
-        console.log('Fetching food data...');
         const response = await menuService.getMenu();
-        console.log('Food data fetched:', response.menu);
-
         const user = await authuserService.getCurrentUser();
         setNetid(user.netid);
 
@@ -30,7 +35,6 @@ const foodQuery = () => {
         const foodWithFavorites = response.menu.map((item: FoodItem) => ({
           ...item,
           isFavorited: favoritedFoodIds.includes(item.foodid),
-          // netid: user.netid,
         }));
 
         setFood(foodWithFavorites);
@@ -83,22 +87,40 @@ const foodQuery = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Food Query</Text>
+
+      {/* Header with Back Button */}
+      <View style={styles.headerRow}>
+        <TouchableOpacity onPress={() => router.push('/dining')} style={styles.backIcon}>
+          <FontAwesome name="arrow-left" size={24} color="#fff" />
+        </TouchableOpacity>
+        <View>
+          <Text style={styles.header}>🔍 Search Food 🔍</Text>
+        </View>
+      </View>
+
+      {/* Search Box */}
+    <View style={styles.searchWrapper}>
       <TextInput
         style={styles.searchInput}
         placeholder="Search for food..."
+        placeholderTextColor="#999"
         value={searchQuery}
         onChangeText={setSearchQuery}
       />
+    </View>
+
+      {/* Food List */}
+    <View style={styles.listWrapper}>
       <FlatList
         data={filteredFood}
         keyExtractor={(item) => item.foodid.toString()}
+        contentContainerStyle={styles.listContainer}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.item}
             onPress={() =>
               router.push({
-                pathname: "../nutritional",
+                pathname: '../nutritional',
                 params: { foodid: item.foodid },
               })
             }
@@ -108,12 +130,13 @@ const foodQuery = () => {
               <FontAwesome
                 name={item.isFavorited ? 'star' : 'star-o'}
                 size={24}
-                color={item.isFavorited ? 'gold' : 'gray'}
+                color={item.isFavorited ? 'gold' : '#ccc'}
               />
             </TouchableOpacity>
           </TouchableOpacity>
         )}
       />
+      </View>
     </View>
   );
 };
@@ -121,33 +144,64 @@ const foodQuery = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#001F54',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  headerRow: {
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 48,
+    marginBottom: 16,
+  },
+  backIcon: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    padding: 12,
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 16,
+    color: '#fff',
+    textAlign: 'center',
   },
   searchInput: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    paddingHorizontal: 8,
-    marginBottom: 16,
+    height: 48, // matches item height
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    marginBottom: 12,
+  },
+  searchWrapper: {
+    paddingBottom: 12,
+  },
+  listContainer: {
+    paddingBottom: 20,
   },
   item: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: '#fff',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
+  listWrapper: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    flex: 1,
+  },
   foodText: {
     fontSize: 18,
     color: '#333',
+    flex: 1,
   },
 });
 
