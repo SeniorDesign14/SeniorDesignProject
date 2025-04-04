@@ -28,8 +28,11 @@ router.get('/:foodid', async (req, res) => {
         });
 
         if (menuItem && menuItem.image) {
-            res.set('Content-Type', 'image/png'); // Set the correct content type
-            res.status(200).send(menuItem.image);
+            // Convert the image buffer to a Base64 string
+            const base64Image = menuItem.image.toString('base64');
+            res.status(200).send({
+                image: `data:image/png;base64,${base64Image}` // Include the Base64 string with the MIME type
+            });
         } else {
             res.status(404).send({
                 error: 'Image not found.'
