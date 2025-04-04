@@ -44,7 +44,7 @@ interface NutritionalInfo {
 }
 
 const nutritional = () => {
-  const { foodid } = useLocalSearchParams();
+  const { foodid, allergens } = useLocalSearchParams();
   const [nutritionalInfo, setNutritionalInfo] = useState<NutritionalInfo | null>(null);
 
   useEffect(() => {
@@ -103,6 +103,11 @@ const nutritional = () => {
         <Text style={styles.label}>Iron: <Text style={styles.value}>{nutritionalInfo.iron}mg ({nutritionalInfo.irondv}%)</Text></Text>
         <Text style={styles.label}>Vitamin D: <Text style={styles.value}>{nutritionalInfo.vitamind}mcg ({nutritionalInfo.vitaminddv}%)</Text></Text>
         <Text style={styles.label}>Potassium: <Text style={styles.value}>{nutritionalInfo.potassium}mg ({nutritionalInfo.potassiumdv}%)</Text></Text>
+        {typeof allergens === 'string' && allergens.trim() && (
+          <Text style={styles.label}>
+            Allergens: <Text style={styles.value}>{allergens}</Text>
+          </Text>
+        )}
       </View>
 
       

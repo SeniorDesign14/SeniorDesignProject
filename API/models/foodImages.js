@@ -1,35 +1,39 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../database.js'; // Import the connection to the database
  
-class Menu extends Model {}
+class FoodImages extends Model {}
  
-Menu.init(
+FoodImages.init(
     {
-        foodid: {
+        imageid: {
             type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true,
             autoIncrement: true,
         },
-        food: {
-            type: DataTypes.STRING,
+        foodid: {
+            type: DataTypes.INTEGER,
             allowNull: false,
+        },
+        image: {
+            type: DataTypes.TEXT,
+            allowNull: true,
         },
     },
     {
         sequelize,
-        modelName: 'menu',
-        tableName: 'menu',
+        modelName: 'foodimages',
+        tableName: 'foodimages',
         timestamps: false,
     }
 );
  
 // define associations
-Menu.associate = (models) => {
-    Menu.hasMany(models.FoodImages, {
+FoodImages.associate = (models) => {
+    FoodImages.belongsTo(models.Menu, {
         foreignKey: 'foodid',
-        as: 'images',
+        as: 'food',
     });
 };
  
-export default Menu;
+export default FoodImages;

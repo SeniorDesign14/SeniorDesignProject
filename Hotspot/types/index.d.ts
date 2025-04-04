@@ -75,4 +75,5 @@ declare interface FoodItem {
     foodid: number;
     food: string;
     isFavorited: boolean;
+    allergens: string;
 }
