@@ -118,8 +118,9 @@ const menu = () => {
   // State for modal visibility and selected image
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [foodName, setFoodName] = useState('');
 
-  const handleFoodImagePress = (foodId: number) => {
+  const handleFoodImagePress = (foodId: number, food: string) => {
     menuService
       .getFoodImage(foodId)
       .then((response) => {
@@ -128,6 +129,7 @@ const menu = () => {
         } else {
           setSelectedImage(null); // No image available
         }
+        setFoodName(food); // Set the food name
         setModalVisible(true); // Open the modal
       })
       .catch((error) => {
@@ -161,7 +163,7 @@ const menu = () => {
                   <Text style={styles.foodText}>{item.food}</Text>
                     <View style={styles.iconContainer}>
                     <TouchableOpacity
-                      onPress={() => handleFoodImagePress(item.foodid)}
+                      onPress={() => handleFoodImagePress(item.foodid, item.food)}
                       style={styles.imageButton}
                     >
                       <FontAwesome name="image" size={24} color="gray" />
@@ -203,6 +205,7 @@ const menu = () => {
 
       {/* Modal to display the food image */}
       <FoodImageModal
+        foodName={foodName}
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         imageUri={selectedImage}
