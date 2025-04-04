@@ -9,49 +9,26 @@ type Message = {
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-
   const [input, setInput] = useState('');
 
   const handleSend = async () => {
-  const handleSend = async () => {
     if (input.trim() === '') return;
-
-    // const userMessage: Message = { text: input, sender: 'user' };
-    // setMessages((prevMessages) => [...prevMessages, userMessage]);
-
-    // try {
-    //   const { response } = await gptService.sendQuestion(input);
-    //   const botMessage: Message = { text: response, sender: 'bot' };
-    //   setMessages((prevMessages) => [...prevMessages, botMessage]);
-    // } catch (error) {
-    //   console.error('AI error:', error);
-    //   const errorMsg: Message = {
-    //     text: 'Oops! Something went wrong. Try again later.',
-    //     sender: 'bot',
-    //   };
-    //   setMessages((prevMessages) => [...prevMessages, errorMsg]);
-    // }
 
     const userMessage: Message = { text: input, sender: 'user' };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setInput('');
 
     try {
-      const response = await gptService.sendQuestion(input);
-
-      const resultText = response.result
-        ? JSON.stringify(response.result, null, 2)
-        : response.message || "No result found.";
-
-      const botResponse: Message = { text: resultText, sender: 'bot' };
-      setMessages((prevMessages) => [...prevMessages, botResponse]);
+      const { response } = await gptService.sendQuestion(input);
+      const botMessage: Message = { text: response, sender: 'bot' };
+      setMessages((prevMessages) => [...prevMessages, botMessage]);
     } catch (error) {
-      console.error('Error sending message to chatbot:', error);
-      const botResponse: Message = {
-        text: 'Sorry, failed to contact chatbot.',
+      console.error('AI error:', error);
+      const errorMsg: Message = {
+        text: 'Oops! Something went wrong. Try again later.',
         sender: 'bot',
       };
-      setMessages((prevMessages) => [...prevMessages, botResponse]);
+      setMessages((prevMessages) => [...prevMessages, errorMsg]);
     }
 
     setInput('');
@@ -164,5 +141,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-}
+
 export default ChatScreen;

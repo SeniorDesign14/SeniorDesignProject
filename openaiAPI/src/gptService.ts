@@ -47,3 +47,25 @@ SQL:
   const sql = response.choices[0].message.content?.trim();
   return sql || "";
 }
+
+
+export async function respondWithNaturalLanguage(question: string, results: any[]): Promise<string> {
+  const prompt = `
+You are a helpful dining assistant. A user asked the following question:
+
+"${question}"
+
+Here is the data returned from the database:
+${JSON.stringify(results, null, 2)}
+
+Write a clear, concise, and friendly response that summarizes this data for the user.
+`;
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.7,
+  });
+
+  return response.choices[0].message.content?.trim() || "Sorry, I couldn't generate a response";
+}
