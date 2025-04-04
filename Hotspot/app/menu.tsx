@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { TabBar, TabView } from 'react-native-tab-view';
 import { FontAwesome } from '@expo/vector-icons';
 import { favoritedService } from '@/api/services/favoritedService';
+import { authuserService } from '@/api/services/authuserService';
 
 
 // converts datestring from "yyyy-MM-dd" to "Tuesday, Mar 13"
@@ -22,6 +23,8 @@ const menu = () => {
   // grab name and id from dining.tsx (from DiningItem component)
   const { name, id, mealPeriod, selectedDate } = useLocalSearchParams() as { name: string; id: string; mealPeriod: string; selectedDate?: string, };
   const navigation = useNavigation();
+
+  const [userNetid, setUserNetid] = useState<string | null>(null);
   
   // Convert selectedDate to proper format or use current date if not provided
   const formattedDate = selectedDate ? selectedDate : format(new Date(), 'yyyy-MM-dd');
@@ -51,7 +54,10 @@ const menu = () => {
         const response = await scheduleService.getSchedule(id, formattedDate);
 
         // fetch favorited foods
-        const favoritedResponse = await favoritedService.getFavorited('jas20060'); // replace with actual netid
+        const user = await authuserService.getCurrentUser();
+        setUserNetid(user.netid);
+
+        const favoritedResponse = await favoritedService.getFavorited(user.netid); // replace with actual netid
         const favoritedFoodIds = favoritedResponse.favoriteFoods.map((item: { foodid: number }) => item.foodid);
 
         // map through the schedule and add isFavorited property
@@ -94,13 +100,13 @@ const menu = () => {
         // Update the favorite status in the database
         if (!item.isFavorited) {
           await favoritedService.postFavorited({
-            netid: 'jas20060', // replace with actual netid
+            netid: userNetid!, // replace with actual netid
             foodid: item.foodid,
             food: item.food,
             dininghallid: 1
           });
         } else {
-          await favoritedService.deleteFavorited('jas20060', item.foodid); // replace with actual netid
+          await favoritedService.deleteFavorited(userNetid!, item.foodid); // replace with actual netid
         }
       } catch (error) {
         console.error(error);
