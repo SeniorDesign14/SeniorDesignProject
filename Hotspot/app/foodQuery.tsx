@@ -122,57 +122,58 @@ const foodQuery = () => {
       </View>
 
       {/* Search Box */}
-    <View style={styles.searchWrapper}>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search for food..."
-        placeholderTextColor="#999"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
-    </View>
+      <View style={styles.searchWrapper}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search for food..."
+          placeholderTextColor="#999"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
 
       {/* Food List */}
-    <View style={styles.listWrapper}>
-      <FlatList
-        data={filteredFood}
-        keyExtractor={(item) => item.foodid.toString()}
-        contentContainerStyle={styles.listContainer}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() =>
-              router.push({
-                pathname: '../nutritional',
-                params: { foodid: item.foodid },
-              })
-            }
-          >
+      <View style={styles.listWrapper}>
+        <FlatList
+          data={filteredFood}
+          keyExtractor={(item) => item.foodid.toString()}
+          contentContainerStyle={styles.listContainer}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.item}
+              onPress={() =>
+                router.push({
+                  pathname: '../nutritional',
+                  params: { foodid: item.foodid },
+                })
+              }
+            >
             <Text style={styles.foodText}>{item.food}</Text>
-              <View style={styles.iconContainer}>
-                <TouchableOpacity
-                  onPress={() => handleFoodImagePress(item.foodid)}
-                  style={styles.imageButton}
-                >
-                  <FontAwesome name="image" size={24} color="gray" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => toggleFavorite(item)} style={styles.icon}>
-                  <FontAwesome
-                    name={item.isFavorited ? 'star' : 'star-o'}
-                    size={24}
-                    color={item.isFavorited ? 'gold' : 'gray'}
-                  />
-                </TouchableOpacity>
-                </View>
-          </TouchableOpacity>
-        )}
-      />
-      
-      <FoodImageModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        imageUri={selectedImage}
-      />
+            <View style={styles.iconContainer}>
+              <TouchableOpacity
+                onPress={() => handleFoodImagePress(item.foodid)}
+                style={styles.imageButton}
+              >
+                <FontAwesome name="image" size={24} color="gray" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => toggleFavorite(item)} style={styles.icon}>
+                <FontAwesome
+                  name={item.isFavorited ? 'star' : 'star-o'}
+                  size={24}
+                  color={item.isFavorited ? 'gold' : 'gray'}
+                />
+              </TouchableOpacity>
+            </View>
+            </TouchableOpacity>
+          )}
+        />
+        
+        <FoodImageModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          imageUri={selectedImage}
+        />
+      </View>
     </View>
   );
 };
