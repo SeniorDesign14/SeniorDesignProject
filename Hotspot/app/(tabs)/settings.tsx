@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StyleSheet, ScrollView, Button, Switch, TextInput } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, ScrollView, Button, Switch, TextInput, Linking } from 'react-native';
 import React, { useState } from 'react';
 
 // // const Settings = () => {
@@ -62,7 +62,7 @@ const Settings: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>General</Text>
           <Button title="FAQs" onPress={() => {}} color="#001F54" />
-          <Button title="Send Feedback" onPress={() => {}} color="#001F54" />
+          <Button title="Send Feedback" onPress={() => Linking.openURL("https://forms.office.com/Pages/ResponsePage.aspx?id=fqjxFyUqqk65351DkDSwgPRVHJJt2T1NrjqsP78_6B1URVNVV0tZWVVYQUtTWlM3VzFETVo5R00wOS4u")} color="#001F54" />
         </View>
 
         {/* Logout Section */}
