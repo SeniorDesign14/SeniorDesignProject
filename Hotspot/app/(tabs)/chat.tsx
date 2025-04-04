@@ -35,6 +35,10 @@ const ChatScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Chat with GenAI</Text>
+      </View>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.container}
@@ -79,7 +83,22 @@ const ChatScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  header: {
+    backgroundColor: '#001F54',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerText: {
+    color: '#fff',
+    fontSize: 22,
+    fontWeight: 'bold',
+  },  
+  container: { 
+    flex: 1, 
+    backgroundColor: '#fff',
+  },
   message: {
     padding: 10,
     margin: 10,
@@ -88,7 +107,7 @@ const styles = StyleSheet.create({
   },
   userMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: '#007bff',
+    backgroundColor: '#001F54',
   },
   botMessage: {
     alignSelf: 'flex-start',
@@ -113,7 +132,7 @@ const styles = StyleSheet.create({
   sendButton: {
     marginLeft: 10,
     padding: 10,
-    backgroundColor: '#007bff',
+    backgroundColor: '#001F54',
     borderRadius: 8,
   },
   sendButtonText: {
