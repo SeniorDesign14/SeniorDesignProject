@@ -9,8 +9,16 @@ router.post('/', async (req, res) => {
   console.log(question);
 
   try {
-    const sql = await askGPT(question);
-    console.log("Generated SQL:", sql); 
+    let sql = await askGPT(question);
+    console.log("Raw GPT SQL:", sql);
+
+    //  Sanitize GPT output
+    sql = sql
+    .replace(/```sql|```/g, '')              
+    .replace(/location\s*=\s*/gi, 'location ILIKE ')  
+    .trim();
+
+console.log("Sanitized SQL:", sql);
 
     const [resultRows] = await sequelize.query(sql); 
     console.log("SQL Result:", resultRows); 

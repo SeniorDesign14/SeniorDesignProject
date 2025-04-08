@@ -48,8 +48,8 @@ export function isValidDate(dateStr) {
 // Get all dining hall names
 export async function getAllDiningHalls() {
   try {
-    const halls = await DiningHall.findAll({ attributes: ["hallname"] });
-    return halls.map((h) => h.getDataValue("hallname").toLowerCase());
+    const halls = await DiningHall.findAll({ attributes: ["location"] });
+    return halls.map((h) => h.getDataValue("location").toLowerCase());
   } catch (error) {
     console.error("Error fetching dining halls:", error);
     return [];
