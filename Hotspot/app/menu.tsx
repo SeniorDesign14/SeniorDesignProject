@@ -63,11 +63,25 @@ const menu = () => {
         const favoritedFoodIds = favoritedResponse.favoriteFoods.map((item: { foodid: number }) => item.foodid);
 
         // map through the schedule and add isFavorited property
-        const scheduleWithFavorites = response.schedule.map((item: Schedule) => ({
-          ...item,
-          isFavorited: favoritedFoodIds.includes(item.foodid)
-        }));
-        setSchedule(scheduleWithFavorites);
+        const scheduleWithExtras = await Promise.all(
+          response.schedule.map(async (item: Schedule) => {
+            let imageUri = "";
+            try {
+              const imageResponse = await menuService.getFoodImage(item.foodid);
+              imageUri = imageResponse.image || "";
+            } catch (error) {
+              console.error('Error fetching food image:', error);
+            }
+  
+            return {
+              ...item,
+              isFavorited: favoritedFoodIds.includes(item.foodid),
+              imageUri, // Add the image URI to the item
+            };
+          })
+        );
+
+        setSchedule(scheduleWithExtras);
       } catch (error) {
         console.error(error);
       }
@@ -82,9 +96,9 @@ const menu = () => {
     const meals = schedule.filter(item => item[`is${mealP.toLowerCase()}` as keyof Schedule]);
     meals.forEach(item => {
       if (filterMeals[item.station.stationname]) {
-        filterMeals[item.station.stationname].push({ foodid: item.foodid, food: item.food, isFavorited: item.isFavorited, allergens: item.allergens });
+        filterMeals[item.station.stationname].push({ foodid: item.foodid, food: item.food, isFavorited: item.isFavorited, allergens: item.allergens, imageUri: item.imageUri });
       } else {
-        filterMeals[item.station.stationname] = [{ foodid: item.foodid, food: item.food, isFavorited: item.isFavorited, allergens: item.allergens }];
+        filterMeals[item.station.stationname] = [{ foodid: item.foodid, food: item.food, isFavorited: item.isFavorited, allergens: item.allergens, imageUri: item.imageUri }];
       }
     });
     return filterMeals;
@@ -158,7 +172,7 @@ const menu = () => {
                   router.push({
                     pathname: "../nutritional",
                     params: { foodid: item.foodid, allergens: item.allergens },
-                  }); // Add navigation to nutritional page
+                  });
                 }}>
                   <Text style={styles.foodText}>{item.food}</Text>
                     <View style={styles.iconContainer}>
@@ -166,7 +180,10 @@ const menu = () => {
                       onPress={() => handleFoodImagePress(item.foodid, item.food)}
                       style={styles.imageButton}
                     >
-                      <FontAwesome name="image" size={24} color="gray" />
+                      <Image
+                        source={{ uri: item.imageUri }}
+                        style={styles.foodIcon}
+                      />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => toggleFavorite(item)} style={styles.icon}>
                       <FontAwesome
@@ -267,6 +284,10 @@ const styles = StyleSheet.create({
   },
   imageButton: {
     marginRight: 10,
+  },
+  foodIcon: {
+    width: 20,
+    height: 20,
   },
 });
 

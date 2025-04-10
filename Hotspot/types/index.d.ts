@@ -69,6 +69,7 @@ declare interface Schedule {
     },
     time: string,
     isFavorited: boolean
+    imageUri: string;
 }
 
 declare interface FoodItem {
@@ -76,4 +77,5 @@ declare interface FoodItem {
     food: string;
     isFavorited: boolean;
     allergens: string;
+    imageUri: string;
 }
