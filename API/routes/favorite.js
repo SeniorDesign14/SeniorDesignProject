@@ -57,10 +57,11 @@ router.get('/top5', async (req, res) => {
     try {
         const favoriteFoods = await FavoriteFoods.findAll({
             attributes: [
+                'foodid',
                 'food',
                 [sequelize.fn('COUNT', sequelize.col('food')), 'count'] // Count occurrences of each food
             ],
-            group: ['food'], // Group by food
+            group: ['foodid', 'food'], // Group by food
             order: [[sequelize.literal('count'), 'DESC'], ['food', 'ASC']], // Order by count and alphabetically
             limit: 5
         });
@@ -82,7 +83,8 @@ router.get('/:netid', async (req, res) => {
         const favoriteFoods = await FavoriteFoods.findAll({
             where: {
                 netid
-            }
+            },
+            order: [['food', 'ASC']] // Order alphabetically
         });
         res.status(200).send({
             favoriteFoods
