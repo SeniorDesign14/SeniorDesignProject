@@ -13,7 +13,7 @@ import { menuService } from '../api/services/menuService';
 import { favoritedService } from '../api/services/favoritedService';
 import { authuserService } from '../api/services/authuserService';
 import { FontAwesome } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import FoodImageModal from '@/components/FoodModal';
 
 const foodQuery = () => {
@@ -21,6 +21,7 @@ const foodQuery = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredFood, setFilteredFood] = useState<FoodItem[]>([]);
   const [_netid, setNetid] = useState<string | null>(null);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchFood = async () => {
@@ -128,7 +129,7 @@ const foodQuery = () => {
 
       {/* Header with Back Button */}
       <View style={styles.headerRow}>
-        <TouchableOpacity onPress={() => router.push('/dining')} style={styles.backIcon}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
           <FontAwesome name="arrow-left" size={24} color="#fff" />
         </TouchableOpacity>
         <View>

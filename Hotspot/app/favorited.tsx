@@ -17,22 +17,6 @@ const Favorited = () => {
 
   const navigation = useNavigation();
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: 'Favorited Foods',
-      headerLeft: () => (
-        <TouchableOpacity onPress={() => router.push('/dining')} style={{ paddingLeft: 16 }}>
-          <FontAwesome name="arrow-left" size={24} color="#fff" />
-        </TouchableOpacity>
-      ),
-      headerStyle: {
-        backgroundColor: '#001F54',
-      },
-      headerTitleStyle: {
-        color: '#fff',
-      },
-    });
-  }, [navigation]);
 
   useEffect(() => {
     const fetchFavorited = async () => {
@@ -110,7 +94,7 @@ const Favorited = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/dining')} style={styles.backIcon}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
             <FontAwesome name="arrow-left" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerText}>⭐ Your Favorited Foods ⭐</Text>
