@@ -31,12 +31,6 @@ const menu = () => {
   // Convert selectedDate to proper format or use current date if not provided
   const formattedDate = selectedDate ? selectedDate : format(new Date(), 'yyyy-MM-dd');
 
-  useLayoutEffect(() => {
-    if (name) {
-      navigation.setOptions({ title: name }); // Set the screen title to the "name"
-    }
-  }, [name, navigation]);
-
   const [schedule, setSchedule] = useState<Schedule[]>([]);
   const [routes] = useState([
     { key: 'breakfast', title: 'Breakfast' },
@@ -157,7 +151,6 @@ const menu = () => {
 
     return (
       <ScrollView style={styles.container}>
-        <Text style={styles.date}>{formatToTextDate(formattedDate)}</Text>
 
         {Object.entries(meals).map(([station, foods], index) => (
           <View key={index} style={styles.section}>
@@ -212,14 +205,24 @@ const menu = () => {
         renderScene={renderScene}
         onIndexChange={setIndex}
         initialLayout={{ width: Dimensions.get('window').width }}
+        style={{ flex: 1, backgroundColor: '#001F54' }}
         renderTabBar={props => (
-          <TabBar
-            {...props}
-            activeColor="white"
-            inactiveColor="gray"
-            indicatorStyle={{ backgroundColor: '#001F54', height: '100%', borderRadius: 10 }}
-            style={{ backgroundColor: 'white', borderRadius: 10, margin: 10 }}
-          />
+          <View>
+            <View style={styles.header}>
+              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
+                  <FontAwesome name="arrow-left" size={24} color="#fff" />
+              </TouchableOpacity>
+              <Text style={styles.headerText}>{name}</Text>
+            </View>
+            <Text style={styles.date}>{formatToTextDate(formattedDate)}</Text>
+            <TabBar
+              {...props}
+              activeColor="white"
+              inactiveColor="gray"
+              indicatorStyle={{ backgroundColor: '#001F54', height: '100%', borderRadius: 5 }}
+              style={{ backgroundColor: 'white', borderRadius: 10, margin: 10 }}
+            />
+          </View>
         )}
       />
 
@@ -243,8 +246,9 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#001F54', // Dark blue to match the theme
-    marginBottom: 10,
+    color: '#FFF',
+    opacity: 0.8,
+    marginBottom: 4,
     textAlign: 'center',
   },
   section: {
@@ -287,6 +291,25 @@ const styles = StyleSheet.create({
   },
   imageButton: {
     marginRight: 10,
+  },
+  header: {
+    backgroundColor: '#001F54',
+    paddingTop: 20,
+    paddingBottom: 5,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  backIcon: {
+    position: 'absolute',
+    left: 16,
+    top: 20,
+    zIndex: 1,
+  },
+  headerText: {
+    fontSize: 24,
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 
