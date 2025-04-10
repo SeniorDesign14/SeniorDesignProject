@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, SafeAreaView, Image } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { favoritedService } from '../api/services/favoritedService';
 import { authuserService } from '../api/services/authuserService';
@@ -7,14 +7,12 @@ import { useNavigation } from '@react-navigation/native';
 import { useLayoutEffect } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
+import { menuService } from '@/api/services/menuService';
+import FoodImageModal from '@/components/FoodModal';
 
-
-interface FavoritedItem {
-  food: string;
-}
 
 const Favorited = () => {
-  const [favoritedFood, setFavorited] = useState<FavoritedItem[]>([]);
+  const [favoritedFood, setFavorited] = useState<FoodItem[]>([]);
   const [userNetid, setUserNetid] = useState<string | null>(null);
 
   const navigation = useNavigation();
@@ -43,7 +41,25 @@ const Favorited = () => {
         setUserNetid(user.netid);
 
         const response = await favoritedService.getFavorited(user.netid);
-        setFavorited(response.favoriteFoods);
+
+        // Fetch image URLs
+        const imageResponse = await menuService.getImageUrls();
+        const imageMap = imageResponse.images.reduce(
+          (acc: Record<number, string>, item: { foodid: number; imageUrl: string }) => {
+            acc[item.foodid] = item.imageUrl;
+            return acc;
+          },
+          {}
+        );
+
+        // Merge image URLs with food data
+        const foodWithImages = response.favoriteFoods.map((item: FoodItem) => ({
+          ...item,
+          isFavorited: true,
+          imageUrl: imageMap[item.foodid] || "", // Add imageUrl or null if not available
+        }));
+        
+        setFavorited(foodWithImages);
       } catch (error) {
         console.error(error);
       }
@@ -51,6 +67,45 @@ const Favorited = () => {
 
     fetchFavorited();
   }, []);
+
+  const toggleFavorite = async (item: FoodItem) => {
+    if (!userNetid) return;
+
+    // all items are already favorited, so we just need to remove it if this is triggered
+    try {
+      // remove item from state
+      const updatedFood = favoritedFood.filter(foodItem => foodItem.foodid !== item.foodid);
+      setFavorited(updatedFood);
+
+      await favoritedService.deleteFavorited(userNetid, item.foodid);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // State for modal visibility and selected image
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [foodName, setFoodName] = useState('');
+
+  const handleFoodImagePress = (foodId: number, food: string) => {
+      menuService
+        .getFoodImage(foodId)
+        .then((response) => {
+          if (response.image) {
+            setSelectedImage(response.image); // Set the selected image
+          } else {
+            setSelectedImage(null); // No image available
+          }
+          setFoodName(food); // Set the food name
+          setModalVisible(true); // Open the modal
+        })
+        .catch((error) => {
+          console.error('Error fetching food image:', error);
+          setSelectedImage(null); // Handle error by setting no image
+          setModalVisible(true); // Open the modal even if there's no image
+        });
+    };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -66,17 +121,54 @@ const Favorited = () => {
 
       <FlatList
         data={favoritedFood}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item) => item.foodid.toString()}
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={
           <Text style={styles.emptyText}>You haven't favorited any foods yet.</Text>
         }
         renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text style={styles.foodText}>{item.food}</Text>
+          <TouchableOpacity
+            style={styles.item}
+            onPress={() =>
+              router.push({
+                pathname: '../nutritional',
+                params: { foodid: item.foodid },
+              })
+            }
+          >
+          <Text style={styles.foodText}>{item.food}</Text>
+          <View style={styles.iconContainer}>
+            <TouchableOpacity
+              onPress={() => handleFoodImagePress(item.foodid, item.food)}
+              style={styles.imageButton}
+            >
+              {item.imageUrl ? (
+                <Image
+                  source={{ uri: item.imageUrl }}
+                  style={{ width: 40, height: 40, borderRadius: 8 }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <FontAwesome name="image" size={40} color="gray" />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => toggleFavorite(item)} style={styles.icon}>
+              <FontAwesome
+                name={item.isFavorited ? 'star' : 'star-o'}
+                size={24}
+                color={item.isFavorited ? 'gold' : 'gray'}
+              />
+            </TouchableOpacity>
           </View>
+          </TouchableOpacity>
         )}
       />
+      <FoodImageModal
+          foodName={foodName}
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          imageUri={selectedImage}
+        />
     </SafeAreaView>
   );
 };
@@ -123,6 +215,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   item: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
@@ -138,6 +234,16 @@ const styles = StyleSheet.create({
     marginTop: 40,
     color: '#888',
     fontSize: 16,
+  },
+  icon: {
+    marginLeft: 10,
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  imageButton: {
+    marginRight: 10,
   },
 });
 

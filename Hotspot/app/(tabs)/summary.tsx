@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, SafeAreaView, StyleSheet, FlatList, ScrollView } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, FlatList, ScrollView, Image } from 'react-native';
 import { format, parseISO, set } from 'date-fns';
-import { favoritedService } from '../../api/services/favoritedService';
-import { scheduleService } from '../../api/services/scheduleService';
-import { authuserService } from '../../api/services/authuserService';
-
+import { favoritedService } from '@/api/services/favoritedService';
+import { scheduleService } from '@/api/services/scheduleService';
+import { menuService } from '@/api/services/menuService';
 
 const sum = () => {
   const [matches, setMatches] = useState<Schedule[]>([]);
-  const [top5, setTop5] = useState<{ food: string, count: number }[]>([]);
+  const [top5, setTop5] = useState<{ foodid: string, food: string, count: number, imageUrl: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -24,15 +23,11 @@ const sum = () => {
         const top5Response = await favoritedService.getTop5Favorited();
         const top5Map = top5Response["favoriteFoods"];
         // USING THIS FOR DISPLAYING DATA OF TOP 5 FAVORITED FOODS
-        setTop5(top5Map);
+        // setTop5(top5Map);
         // console.log('Top 5 Foods:', top5Map);
 
         // Fetch favorited foods
-        const user = await authuserService.getCurrentUser();
-        if (!user?.netid) throw new Error('User NetID missing');
-        console.log('User NetID:', user.netid);
-        
-        const favoritedResponse = await favoritedService.getFavorited(user.netid); // Replace with actual netid
+        const favoritedResponse = await favoritedService.getFavorited('jas20060'); // Replace with actual netid
         const favoritedList = favoritedResponse.favoriteFoods.map((item: { foodid: number }) => item.foodid);
 
         // Fetch schedule
@@ -79,7 +74,31 @@ const sum = () => {
           return acc;
         }, []);
 
-        setMatches(groupedMatches);
+        // Fetch image URLs
+        const imageResponse = await menuService.getImageUrls();
+        const imageMap = imageResponse.images.reduce(
+          (acc: Record<number, string>, item: { foodid: number; imageUrl: string }) => {
+            acc[item.foodid] = item.imageUrl;
+            return acc;
+          },
+          {}
+        );
+
+        // Merge image URLs with matched foods and top5
+        // Merge image URLs with matched foods
+        const matchedFoodsWithImages = groupedMatches.map((item: Schedule) => ({
+          ...item,
+          imageUrl: imageMap[item.foodid] || "", // Add imageUrl or empty string if not available
+        }));
+
+        // Merge image URLs with top5
+        const top5WithImages = top5Map.map((item: { foodid: number; food: string; count: number }) => ({
+          ...item,
+          imageUrl: imageMap[item.foodid] || "", // Add imageUrl or empty string if not available
+        }));
+
+        setMatches(matchedFoodsWithImages);
+        setTop5(top5WithImages);
         // console.log('Grouped Foods:', groupedMatches);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -158,7 +177,19 @@ const sum = () => {
             </View>
             {top5.map((item, index) => (
               <View key={index} style={styles.tableRow}>
-                <Text style={styles.tableCell}>{index === 0 ? '🔥 ' : ''}{item.food}</Text>
+                <View style={styles.groupedTableCell}>
+                  <View style={styles.rowContainer}>
+                    <Text style={styles.text}>
+                      {index === 0 ? '🔥 ' : ''}{item.food}
+                    </Text>
+                    {item.imageUrl && (
+                      <Image
+                        source={{ uri: item.imageUrl }}
+                        style={styles.foodImage}
+                      />
+                    )}
+                  </View>
+                </View>
                 <Text style={styles.tableCell}>{item.count}</Text>
               </View>
             ))}
@@ -180,7 +211,19 @@ const sum = () => {
                       </View>
                       {items.map((item, index) => (
                         <View key={index} style={styles.tableRow}>
-                          <Text style={styles.tableCell}>{item.food}</Text>
+                          <View style={styles.groupedTableCell}>
+                            <View style={styles.rowContainer}>
+                              <Text style={styles.text}>
+                                {item.food}
+                              </Text>
+                              {item.imageUrl && (
+                                <Image
+                                  source={{ uri: item.imageUrl }}
+                                  style={styles.foodImage}
+                                />
+                              )}
+                            </View>
+                          </View>
                           <Text style={styles.tableCell}>{item.time}</Text>
                           <Text style={styles.tableCell}>{item.hall.location}</Text>
                         </View>
@@ -281,6 +324,29 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     marginTop: 40,
+  },
+  foodImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    marginStart: 4,
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center', // Vertically align the text and image
+  },
+  text: {
+    padding: 12,
+    textAlign: 'center',
+    fontSize: 15,
+    color: '#333',
+  },
+  groupedTableCell: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: 12,
+    paddingRight: 12,
   },
 });
 

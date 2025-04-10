@@ -5,6 +5,7 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Image,
   Dimensions,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
@@ -33,13 +34,25 @@ const foodQuery = () => {
           (item: { foodid: number }) => item.foodid
         );
 
-        const foodWithFavorites = response.menu.map((item: FoodItem) => ({
+        // Fetch image URLs
+        const imageResponse = await menuService.getImageUrls();
+        const imageMap = imageResponse.images.reduce(
+          (acc: Record<number, string>, item: { foodid: number; imageUrl: string }) => {
+            acc[item.foodid] = item.imageUrl;
+            return acc;
+          },
+          {}
+        );
+
+        // Merge image URLs with food data
+        const foodWithImages = response.menu.map((item: FoodItem) => ({
           ...item,
           isFavorited: favoritedFoodIds.includes(item.foodid),
+          imageUrl: imageMap[item.foodid] || "", // Add imageUrl or null if not available
         }));
 
-        setFood(foodWithFavorites);
-        setFilteredFood(foodWithFavorites);
+        setFood(foodWithImages);
+        setFilteredFood(foodWithImages);
       } catch (error) {
         console.error(error);
       }
@@ -156,7 +169,15 @@ const foodQuery = () => {
                 onPress={() => handleFoodImagePress(item.foodid, item.food)}
                 style={styles.imageButton}
               >
-                <FontAwesome name="image" size={24} color="gray" />
+                {item.imageUrl ? (
+                  <Image
+                    source={{ uri: item.imageUrl }}
+                    style={{ width: 40, height: 40, borderRadius: 8 }}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <FontAwesome name="image" size={40} color="gray" />
+                )}
               </TouchableOpacity>
               <TouchableOpacity onPress={() => toggleFavorite(item)} style={styles.icon}>
                 <FontAwesome

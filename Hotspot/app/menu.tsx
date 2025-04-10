@@ -62,24 +62,22 @@ const menu = () => {
         const favoritedResponse = await favoritedService.getFavorited(user.netid); // replace with actual netid
         const favoritedFoodIds = favoritedResponse.favoriteFoods.map((item: { foodid: number }) => item.foodid);
 
-        // map through the schedule and add isFavorited property
-        const scheduleWithExtras = await Promise.all(
-          response.schedule.map(async (item: Schedule) => {
-            let imageUri = "";
-            try {
-              const imageResponse = await menuService.getFoodImage(item.foodid);
-              imageUri = imageResponse.image || "";
-            } catch (error) {
-              console.error('Error fetching food image:', error);
-            }
-  
-            return {
-              ...item,
-              isFavorited: favoritedFoodIds.includes(item.foodid),
-              imageUri, // Add the image URI to the item
-            };
-          })
+        // Fetch image URLs
+        const imageResponse = await menuService.getImageUrls();
+        const imageMap = imageResponse.images.reduce(
+          (acc: Record<number, string>, item: { foodid: number; imageUrl: string }) => {
+            acc[item.foodid] = item.imageUrl;
+            return acc;
+          },
+          {}
         );
+
+        // map through the schedule and add isFavorited property
+        const scheduleWithExtras = response.schedule.map((item: Schedule) => ({
+          ...item,
+          isFavorited: favoritedFoodIds.includes(item.foodid),
+          imageUrl: imageMap[item.foodid] || "", // Add imageUrl or null if not available
+        }));
 
         setSchedule(scheduleWithExtras);
       } catch (error) {
@@ -96,9 +94,9 @@ const menu = () => {
     const meals = schedule.filter(item => item[`is${mealP.toLowerCase()}` as keyof Schedule]);
     meals.forEach(item => {
       if (filterMeals[item.station.stationname]) {
-        filterMeals[item.station.stationname].push({ foodid: item.foodid, food: item.food, isFavorited: item.isFavorited, allergens: item.allergens, imageUri: item.imageUri });
+        filterMeals[item.station.stationname].push({ foodid: item.foodid, food: item.food, isFavorited: item.isFavorited, allergens: item.allergens, imageUrl: item.imageUrl });
       } else {
-        filterMeals[item.station.stationname] = [{ foodid: item.foodid, food: item.food, isFavorited: item.isFavorited, allergens: item.allergens, imageUri: item.imageUri }];
+        filterMeals[item.station.stationname] = [{ foodid: item.foodid, food: item.food, isFavorited: item.isFavorited, allergens: item.allergens, imageUrl: item.imageUrl }];
       }
     });
     return filterMeals;
@@ -180,10 +178,15 @@ const menu = () => {
                       onPress={() => handleFoodImagePress(item.foodid, item.food)}
                       style={styles.imageButton}
                     >
-                      <Image
-                        source={{ uri: item.imageUri }}
-                        style={styles.foodIcon}
-                      />
+                      {item.imageUrl ? (
+                        <Image
+                          source={{ uri: item.imageUrl }}
+                          style={{ width: 40, height: 40, borderRadius: 8 }}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <FontAwesome name="image" size={40} color="gray" />
+                      )}
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => toggleFavorite(item)} style={styles.icon}>
                       <FontAwesome
@@ -284,10 +287,6 @@ const styles = StyleSheet.create({
   },
   imageButton: {
     marginRight: 10,
-  },
-  foodIcon: {
-    width: 20,
-    height: 20,
   },
 });
 
