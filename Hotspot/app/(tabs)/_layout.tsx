@@ -53,14 +53,14 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: 'Search',
           tabBarShowLabel: true,
           tabBarLabelPosition: 'below-icon',
           headerShown: false,
           tabBarActiveTintColor: '#001F54', 
           tabBarInactiveTintColor: '#888', 
           tabBarIcon: ({ color, size }) => (
-            <FontAwesome name="cog" size={size} color={color} /> // Use FontAwesome icon
+            <FontAwesome name="search" size={size} color={color} /> // Use FontAwesome icon
           ),
         }}
       />
