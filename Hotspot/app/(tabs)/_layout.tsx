@@ -25,7 +25,7 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="summary"
         options={{
-          title: 'Summary',
+          title: 'Planner',
           tabBarShowLabel: true,
           tabBarLabelPosition: 'below-icon',
           headerShown: false,

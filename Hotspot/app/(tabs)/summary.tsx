@@ -28,7 +28,10 @@ const sum = () => {
         // console.log('Top 5 Foods:', top5Map);
 
         // Fetch favorited foods
-        const user = await authuserService.getCurrentUser();
+
+        // const user = { netid: 'miw19008' }; // use for dev
+        const user = await authuserService.getCurrentUser(); // use for prod
+        
         if (!user?.netid) throw new Error('User NetID missing');
         console.log('User NetID:', user.netid);
         
@@ -171,7 +174,7 @@ const sum = () => {
       ) : (
         // Render the content only after loading is complete
         <>
-          <Text style={styles.header}>Summary</Text>
+          <Text style={styles.header}>Planner</Text>
 
           {/* Top 5 Favorited Foods */}
           <Text style={styles.subHeader}>Top Favorited</Text>
@@ -201,7 +204,7 @@ const sum = () => {
           </View>
 
           {/* Weekly Matches */}
-          <Text style={styles.subHeader}>Your Weekly Summary</Text>
+          <Text style={styles.subHeader}>Your Upcoming Favorites</Text>
           {Object.keys(groupedMatches).length > 0 ? (
             Object.entries(groupedMatches).map(([day, items]) => (
               <View key={day} style={styles.daySection}>
