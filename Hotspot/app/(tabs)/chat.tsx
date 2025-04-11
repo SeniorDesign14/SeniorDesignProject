@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, } from 'react-native';
 import gptService from '@/api/services/gptService'; 
 
@@ -10,12 +10,15 @@ type Message = {
 const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const flatListRef = useRef<FlatList>(null);
+
 
   const handleSend = async () => {
     if (input.trim() === '') return;
 
     const userMessage: Message = { text: input, sender: 'user' };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setInput('');
 
     try {
       const { response } = await gptService.sendQuestion(input);
@@ -33,10 +36,19 @@ const ChatScreen = () => {
     setInput('');
   };
 
+  // Auto-scroll to latest message
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 100); // Give it time to render new items
+  
+    return () => clearTimeout(timeout);
+  }, [messages]);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Chat with GenAI</Text>
+        <Text style={styles.headerText}>HuskyHotspot GenAI</Text>
       </View>
 
       <KeyboardAvoidingView
@@ -44,6 +56,7 @@ const ChatScreen = () => {
         style={styles.container}
       >
         <FlatList
+          ref={flatListRef}
           data={messages}
           keyExtractor={(_, index) => index.toString()}
           renderItem={({ item }) => (
@@ -65,13 +78,17 @@ const ChatScreen = () => {
               </Text>
             </View>
           )}
+          contentContainerStyle={{ paddingBottom: 20 }} // prevents cut-off on last item
         />
+
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
             placeholder="Ask a question..."
             value={input}
             onChangeText={setInput}
+            onSubmitEditing={handleSend} // triggers send on enter
+            blurOnSubmit={false} // keeps input focused on mobile
           />
           <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
             <Text style={styles.sendButtonText}>Send</Text>
