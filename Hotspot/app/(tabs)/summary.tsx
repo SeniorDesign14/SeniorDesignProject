@@ -4,6 +4,7 @@ import { format, parseISO, set } from 'date-fns';
 import { favoritedService } from '@/api/services/favoritedService';
 import { scheduleService } from '@/api/services/scheduleService';
 import { menuService } from '@/api/services/menuService';
+import { authuserService } from '../../api/services/authuserService';
 
 const sum = () => {
   const [matches, setMatches] = useState<Schedule[]>([]);
@@ -27,7 +28,11 @@ const sum = () => {
         // console.log('Top 5 Foods:', top5Map);
 
         // Fetch favorited foods
-        const favoritedResponse = await favoritedService.getFavorited('jas20060'); // Replace with actual netid
+        const user = await authuserService.getCurrentUser();
+        if (!user?.netid) throw new Error('User NetID missing');
+        console.log('User NetID:', user.netid);
+        
+        const favoritedResponse = await favoritedService.getFavorited(user.netid); // Replace with actual netid
         const favoritedList = favoritedResponse.favoriteFoods.map((item: { foodid: number }) => item.foodid);
 
         // Fetch schedule
