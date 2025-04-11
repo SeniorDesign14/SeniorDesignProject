@@ -1,6 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, } from 'react-native';
-import gptService from '@/api/services/gptService'; 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import gptService from '@/api/services/gptService';
 
 type Message = {
   text: string;
@@ -11,7 +21,6 @@ const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const flatListRef = useRef<FlatList>(null);
-
 
   const handleSend = async () => {
     if (input.trim() === '') return;
@@ -36,14 +45,28 @@ const ChatScreen = () => {
     setInput('');
   };
 
-  // Auto-scroll to latest message
   useEffect(() => {
     const timeout = setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
-    }, 100); // Give it time to render new items
-  
+    }, 100);
     return () => clearTimeout(timeout);
   }, [messages]);
+
+  // Parses **bold** segments into styled <Text>
+  const renderMessageText = (text: string) => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        const clean = part.slice(2, -2);
+        return (
+          <Text key={index} style={{ fontWeight: 'bold' }}>
+            {clean}
+          </Text>
+        );
+      }
+      return <Text key={index}>{part}</Text>;
+    });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -74,11 +97,11 @@ const ChatScreen = () => {
                     : styles.botMessageText,
                 ]}
               >
-                {item.text}
+                {renderMessageText(item.text)}
               </Text>
             </View>
           )}
-          contentContainerStyle={{ paddingBottom: 20 }} // prevents cut-off on last item
+          contentContainerStyle={{ paddingBottom: 20 }}
         />
 
         <View style={styles.inputContainer}>
@@ -87,8 +110,8 @@ const ChatScreen = () => {
             placeholder="Ask a question..."
             value={input}
             onChangeText={setInput}
-            onSubmitEditing={handleSend} // triggers send on enter
-            blurOnSubmit={false} // keeps input focused on mobile
+            onSubmitEditing={handleSend}
+            blurOnSubmit={false}
           />
           <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
             <Text style={styles.sendButtonText}>Send</Text>
@@ -111,9 +134,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 22,
     fontWeight: 'bold',
-  },  
-  container: { 
-    flex: 1, 
+  },
+  container: {
+    flex: 1,
     backgroundColor: '#fff',
   },
   message: {
@@ -130,9 +153,15 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: '#e0e0e0',
   },
-  messageText: { fontSize: 16 },
-  userMessageText: { color: '#fff' },
-  botMessageText: { color: '#333' },
+  messageText: {
+    fontSize: 16,
+  },
+  userMessageText: {
+    color: '#fff',
+  },
+  botMessageText: {
+    color: '#333',
+  },
   inputContainer: {
     flexDirection: 'row',
     padding: 10,
