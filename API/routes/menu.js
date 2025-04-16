@@ -27,7 +27,8 @@ router.get('/images', async (req, res) => {
         res.status(200).send({
             images: images.map(image => ({
                 foodid: image.foodid,
-                imageUrl: `http://huskyhotspot.cse.uconn.edu:3000/menu/image/${image.foodid}` // Construct the image URL
+                // imageUrl: `http://huskyhotspot.cse.uconn.edu:3000/menu/image/${image.foodid}` // Construct the image URL
+                imageUrl: `/menu/image/${image.foodid}` // use if production
             }))
         });
     } catch (error) {

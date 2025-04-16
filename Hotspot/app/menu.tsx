@@ -219,7 +219,7 @@ const menu = () => {
               {...props}
               activeColor="white"
               inactiveColor="gray"
-              indicatorStyle={{ backgroundColor: '#001F54', height: '100%', borderRadius: 5 }}
+              indicatorStyle={{ backgroundColor: '#001F54', height: '100%', borderRadius: 5, width: Dimensions.get('window').width / 3 }}
               style={{ backgroundColor: 'white', borderRadius: 10, margin: 10 }}
             />
           </View>

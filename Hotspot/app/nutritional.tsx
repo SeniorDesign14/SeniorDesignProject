@@ -87,7 +87,11 @@ const nutritional = () => {
       <View style={styles.infoBox}>
         <Text style={styles.label}>Serving Size: {nutritionalInfo.servingsize}</Text>
         <Text style={styles.label}>Servings per Container: {nutritionalInfo.servingspercontainer}</Text>
-        <Text style={styles.label}>Allergens: <Text style={styles.value}>TODO</Text></Text>
+        {typeof allergens === 'string' && allergens.trim() && (
+          <Text style={styles.label}>
+            Allergens: <Text style={styles.value}>{allergens}</Text>
+          </Text>
+        )}
         <Text style={styles.label}>Calories: <Text style={styles.value}>{nutritionalInfo.calories}</Text></Text>
         <Text style={styles.label}>Total Fat: <Text style={styles.value}>{nutritionalInfo.totalfat}g ({nutritionalInfo.totalfatdv}%)</Text></Text>
         <Text style={styles.label}>Saturated Fat: <Text style={styles.value}>{nutritionalInfo.saturatedfat}g ({nutritionalInfo.saturatedfatdv}%)</Text></Text>
@@ -103,11 +107,6 @@ const nutritional = () => {
         <Text style={styles.label}>Iron: <Text style={styles.value}>{nutritionalInfo.iron}mg ({nutritionalInfo.irondv}%)</Text></Text>
         <Text style={styles.label}>Vitamin D: <Text style={styles.value}>{nutritionalInfo.vitamind}mcg ({nutritionalInfo.vitaminddv}%)</Text></Text>
         <Text style={styles.label}>Potassium: <Text style={styles.value}>{nutritionalInfo.potassium}mg ({nutritionalInfo.potassiumdv}%)</Text></Text>
-        {typeof allergens === 'string' && allergens.trim() && (
-          <Text style={styles.label}>
-            Allergens: <Text style={styles.value}>{allergens}</Text>
-          </Text>
-        )}
       </View>
 
       

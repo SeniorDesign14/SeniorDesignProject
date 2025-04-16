@@ -97,7 +97,6 @@ const DiningScreen = () => {
 
       <View style={styles.header}>
 
-
         <View style={styles.headerRow}>
           <View style={styles.centerContainer}>
             <TouchableOpacity onPress={handlePrevDay}>
@@ -108,21 +107,16 @@ const DiningScreen = () => {
               <Text style={styles.arrow}>&gt;</Text>
             </TouchableOpacity>
           </View>
-          
+
           <View style={styles.iconContainer}>
-            <TouchableOpacity onPress={handleSearchPress}>
-              <FontAwesome name="search" size={iconSize} color="#fff" style={styles.icon} />
-            </TouchableOpacity>
             <TouchableOpacity onPress={handleFavoritePress}>
               <FontAwesome name="star" size={iconSize} color="#fff" style={styles.icon} />
             </TouchableOpacity>
           </View>
+
         </View>
-
-
         <Text style={styles.dateText}>{getCurrentDate(selectedDate)}</Text>
       </View>
-
 
       <FlatList<DiningHall>
         data={diningHalls}

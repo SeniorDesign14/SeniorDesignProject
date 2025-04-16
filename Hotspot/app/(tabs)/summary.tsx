@@ -4,6 +4,7 @@ import { format, parseISO, set } from 'date-fns';
 import { favoritedService } from '@/api/services/favoritedService';
 import { scheduleService } from '@/api/services/scheduleService';
 import { menuService } from '@/api/services/menuService';
+import { authuserService } from '../../api/services/authuserService';
 
 const sum = () => {
   const [matches, setMatches] = useState<Schedule[]>([]);
@@ -27,7 +28,14 @@ const sum = () => {
         // console.log('Top 5 Foods:', top5Map);
 
         // Fetch favorited foods
-        const favoritedResponse = await favoritedService.getFavorited('jas20060'); // Replace with actual netid
+
+        // const user = { netid: 'miw19008' }; // use for dev
+        const user = await authuserService.getCurrentUser(); // use for prod
+        
+        if (!user?.netid) throw new Error('User NetID missing');
+        console.log('User NetID:', user.netid);
+        
+        const favoritedResponse = await favoritedService.getFavorited(user.netid); // Replace with actual netid
         const favoritedList = favoritedResponse.favoriteFoods.map((item: { foodid: number }) => item.foodid);
 
         // Fetch schedule
@@ -166,7 +174,7 @@ const sum = () => {
       ) : (
         // Render the content only after loading is complete
         <>
-          <Text style={styles.header}>Summary</Text>
+          <Text style={styles.header}>Planner</Text>
 
           {/* Top 5 Favorited Foods */}
           <Text style={styles.subHeader}>Top Favorited</Text>
@@ -196,7 +204,7 @@ const sum = () => {
           </View>
 
           {/* Weekly Matches */}
-          <Text style={styles.subHeader}>Your Weekly Summary</Text>
+          <Text style={styles.subHeader}>Your Upcoming Favorites</Text>
           {Object.keys(groupedMatches).length > 0 ? (
             Object.entries(groupedMatches).map(([day, items]) => (
               <View key={day} style={styles.daySection}>

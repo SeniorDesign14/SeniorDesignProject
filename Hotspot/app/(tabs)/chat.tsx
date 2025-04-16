@@ -1,6 +1,16 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, } from 'react-native';
-import gptService from '@/api/services/gptService'; 
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import gptService from '@/api/services/gptService';
 
 type Message = {
   text: string;
@@ -10,12 +20,14 @@ type Message = {
 const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const flatListRef = useRef<FlatList>(null);
 
   const handleSend = async () => {
     if (input.trim() === '') return;
 
     const userMessage: Message = { text: input, sender: 'user' };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setInput('');
 
     try {
       const { response } = await gptService.sendQuestion(input);
@@ -33,10 +45,33 @@ const ChatScreen = () => {
     setInput('');
   };
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+    return () => clearTimeout(timeout);
+  }, [messages]);
+
+  // Parses **bold** segments into styled <Text>
+  const renderMessageText = (text: string) => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        const clean = part.slice(2, -2);
+        return (
+          <Text key={index} style={{ fontWeight: 'bold' }}>
+            {clean}
+          </Text>
+        );
+      }
+      return <Text key={index}>{part}</Text>;
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Chat with GenAI</Text>
+        <Text style={styles.headerText}>HuskyHotspot GenAI</Text>
       </View>
 
       <KeyboardAvoidingView
@@ -44,6 +79,7 @@ const ChatScreen = () => {
         style={styles.container}
       >
         <FlatList
+          ref={flatListRef}
           data={messages}
           keyExtractor={(_, index) => index.toString()}
           renderItem={({ item }) => (
@@ -61,17 +97,21 @@ const ChatScreen = () => {
                     : styles.botMessageText,
                 ]}
               >
-                {item.text}
+                {renderMessageText(item.text)}
               </Text>
             </View>
           )}
+          contentContainerStyle={{ paddingBottom: 20 }}
         />
+
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
             placeholder="Ask a question..."
             value={input}
             onChangeText={setInput}
+            onSubmitEditing={handleSend}
+            blurOnSubmit={false}
           />
           <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
             <Text style={styles.sendButtonText}>Send</Text>
@@ -94,9 +134,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 22,
     fontWeight: 'bold',
-  },  
-  container: { 
-    flex: 1, 
+  },
+  container: {
+    flex: 1,
     backgroundColor: '#fff',
   },
   message: {
@@ -113,9 +153,15 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: '#e0e0e0',
   },
-  messageText: { fontSize: 16 },
-  userMessageText: { color: '#fff' },
-  botMessageText: { color: '#333' },
+  messageText: {
+    fontSize: 16,
+  },
+  userMessageText: {
+    color: '#fff',
+  },
+  botMessageText: {
+    color: '#333',
+  },
   inputContainer: {
     flexDirection: 'row',
     padding: 10,
